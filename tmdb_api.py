@@ -98,7 +98,7 @@ def main():
     id = 9884
     movie1 = get_movie_by_id(id)
 
-    print(f"Genres du film d'id {id} : {movie1.genres}")
+    print(f"Id {id} : genres : {movie1.genres}")
 
 
 if __name__ == '__main__':

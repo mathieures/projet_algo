@@ -63,13 +63,10 @@ def getScript(url):
     soup = BeautifulSoup(req.text, "html.parser")
 
     tag = soup.find(class_="scrtext")
-    texte = tag.pre
-
-    return texte
+    return None if tag is None else tag.pre # Le texte, donc le script
 
 
 def main():
-
     dico = getName()
     texte = getScript(dico["30 Minutes or Less"])
     print(str(texte))
