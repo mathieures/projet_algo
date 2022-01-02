@@ -1,4 +1,4 @@
-from imsdb_api import getName as get_all_scripts_urls, getScript as get_script
+import imsdb_api
 import tmdb_api
 from interface import Interface
 from Movie import Movie
@@ -15,20 +15,26 @@ NB_MOVIES = 0
 MOVIES_BY_GENRE = {} # Associe un genre (str) à une liste d'objets Movie
 
 
-def parse_movie(title, script_url, index=0):
+# TODO : voir ce qu'il faut modif ici, je pense qu'il y a bcp de trucs vu que
+# j'ai modif Movie. Voir ce qu'on remplace par des PartialMovie, bien vérif
+# les résultats, et aussi quand est-ce qu'on peut utiliser un Movie
+# (après appel des deux APIs très sûrement)
+
+
+
+def parse_movie(title, movie_url, index=0):
     global NB_PARSED_MOVIES
     global MOVIES_BY_GENRE
 
     # print(f"Traitement du film {title} ({index}/{NB_MOVIES})")
-    # Récupération du script sur la page html
-    # TODO : enlever le str() une fois le module modifié pour ne renvoyer que le texte
-    script = get_script(script_url)
-    if script is None:
+
+    if temp_movie.script is None:
         print(f"[Avertissement] Le film '{title}' n'a pas de script")
     else:
         # TODO : Trouver pourquoi ça fonctionne pas toujours le cast (erreur du côté de bs4)
         try:
-            script = str(script)
+            # TODO : enlever le str() une fois le module modifié pour ne renvoyer que le texte
+            temp_movie.script = str(temp_movie.script)
         except RecursionError as e:
             print(f"[Erreur] {e}")
         # S'il n'y a pas eu d'erreur
@@ -38,9 +44,7 @@ def parse_movie(title, script_url, index=0):
             result = tmdb_api.search_movie(title)
             # Si le film a été trouvé sur le site
             if result is not None:
-                movie = Movie(title=result.title,
-                              genres=result.genres,
-                              script=script)
+                movie = Movie.merge_into_Movie(temp_movie, result)
 
                 # On ajoute les genres de ce film à l'index
                 for genre in result.genres:
@@ -60,8 +64,6 @@ def parse_movie(title, script_url, index=0):
     print(f"-- Traitement de '{title}' terminé "
           f"(reste : {NB_MOVIES - NB_PARSED_MOVIES}) --")
     # print(movie)
-    # all_movies.append(movie)
-
 
 
 def main():
@@ -70,13 +72,15 @@ def main():
 
     if not os.path.exists(SAVE_FILE_NAME):
         # Récupération des données sur le site de scénarios
-        # Dictionnaire associant un nom de film à un url de script
-        data = get_all_scripts_urls()
+        # Dictionnaire associant un nom de film à un url et des genres
+        data = imsdb_api.getName()
         NB_MOVIES = len(data)
 
         # Conversion en objets Movie
 
         # On lance et on attend que tout se finisse
+
+        """
         threads = [
             threading.Thread(
                 target=parse_movie,
@@ -87,9 +91,10 @@ def main():
             t.start()
         for t in threads:
             t.join()
+        """
             
-        with open(SAVE_FILE_NAME, "wb") as f:
-            pickle.dump(MOVIES_BY_GENRE, f)
+        # with open(SAVE_FILE_NAME, "wb") as f:
+        #     pickle.dump(MOVIES_BY_GENRE, f)
     else:
         with open(SAVE_FILE_NAME, "rb") as f:
             MOVIES_BY_GENRE = pickle.load(f)
