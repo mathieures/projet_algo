@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from Movie import Movie
 import tmdb_api
+import recuperationNomFilm as rnf
 
 
 UNKNOWN_GENRE = "Unknown" # Genre pour les films dont on ne connaît pas le genre
@@ -105,24 +106,30 @@ def main():
     # ...
 
     ### pour le test ###
-    data = {
-        "John Carter": "http://example.com",
-        "Collateral Damage": "http://example.com",
-        "Tarzan": "http://example.com"
-    }
+    # data = {
+    #     "John Carter": "http://example.com",
+    #     "Collateral Damage": "http://example.com",
+    #     "Tarzan": "http://example.com"
+    # }
+
+    data = rnf.getName()
 
     # all_movies = [] # Liste de tous les objets Movie
     movies_by_genre = {} # Associe un genre (str) à une liste d'objets Movie
 
+    acc = 0
     # Conversion en objets Movie
     for title in data:
+        print(acc)
+        acc += 1
         # print(f"Récupération des informations du film : {title}")
 
         # Récupération du script sur la page html    
         # print(f"Récupération du script")
 
         ### pour le test ###
-        script = "Mathieu: I think Thomas stole my donut\nThomas: No it's Tiphaine I saw her!"
+        # script = "Mathieu: I think Thomas stole my donut\nThomas: No it's Tiphaine I saw her!"
+        # On récupere le script uniquement si le film est choisi
 
         # Communication avec l'API The Movie DataBase pour connaître les genres du film
         # print(f"Récupération des genres")
@@ -134,8 +141,7 @@ def main():
         # Si le film a été trouvé sur le site
         if result is not None:
             movie = Movie(title=result.title,
-                          genres=result.genres,
-                          script=script)
+                          genres=result.genres,lien=data[title])
 
             # On ajoute les genres de ce film à l'index
             for genre in result.genres:
@@ -145,7 +151,7 @@ def main():
         # Sinon, on ne connaît pas ses genres
         # TODO : voir si on prend les genres présents sur le site de script
         else:
-            movie = Movie(title=title, genres=[], script=script)
+            movie = Movie(title=title, genres=[],lien=data[title])
             if UNKNOWN_GENRE not in movies_by_genre:
                 movies_by_genre[UNKNOWN_GENRE] = []
             movies_by_genre[UNKNOWN_GENRE].append(movie)

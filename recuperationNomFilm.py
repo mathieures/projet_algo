@@ -42,30 +42,30 @@ def getName():
     return dico
 
 
-def getScript(url):
-    """
-        Fonction qui prend en entrée le nom de l'url temporaire pour acceder au script
-        et qui renvoie le script sous forme de str
-    """
-    req = requests.get(url)
-    soup = BeautifulSoup(req.text, "html.parser")
+# def getScript(url):
+#     """
+#         Fonction qui prend en entrée le nom de l'url temporaire pour acceder au script
+#         et qui renvoie le script sous forme de str
+#     """
+#     req = requests.get(url)
+#     soup = BeautifulSoup(req.text, "html.parser")
 
-    tag = soup.find(class_="script-details")
-    tag.tbody
-    tag.find_all("tr")[1]
-    tag.find_all("td")[1]
-    a = tag.find_all("a")[-1]
+#     tag = soup.find(class_="script-details")
+#     tag.tbody
+#     tag.find_all("tr")[1]
+#     tag.find_all("td")[1]
+#     a = tag.find_all("a")[-1]
 
-    urlScript = SITE + a["href"]
+#     urlScript = SITE + a["href"]
 
-    # Seconde requete pour le texte du script cette fois
-    req = requests.get(urlScript)
-    soup = BeautifulSoup(req.text, "html.parser")
+#     # Seconde requete pour le texte du script cette fois
+#     req = requests.get(urlScript)
+#     soup = BeautifulSoup(req.text, "html.parser")
 
-    tag = soup.find(class_="scrtext")
-    texte = tag.pre
+#     tag = soup.find(class_="scrtext")
+#     texte = tag.pre
 
-    return texte
+#     return texte
 
 
 def main():
