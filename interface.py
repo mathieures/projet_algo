@@ -1,15 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from Movie import Movie
-import tmdb_api
 
-
-UNKNOWN_GENRE = "Unknown" # Genre pour les films dont on ne connaît pas le genre
-
-
-"""
-TODO : mettre les récupérations etc dans leur propre script
-"""
 
 class Interface:
     """Interface complète à instancier"""
@@ -101,56 +92,15 @@ def main():
     Simulation de ce qu'un script regroupant la
     récupération des données et l'affichage ferait
     """
+
+    import imsdb_api
     
     # Récupération des données sur le site de scénarios
-    
-    import recuperationNomFilm as rnf
 
-    data = rnf.getName()
-    movies_by_genre = {} # Associe un genre (str) à une liste d'objets Movie
+    data = imsdb_api.getName() # movies_by_genre doit contenir des objets Movie ou PartialMovie, à voir
 
-    acc = 0
-    # Conversion en objets Movie
-    for title in data:
-        print(acc)
-        acc += 1
-        # print(f"Récupération des informations du film : {title}")
-
-        # Récupération du script sur la page html    
-        # print(f"Récupération du script")
-
-        ### pour le test ###
-        # script = "Mathieu: I think Thomas stole my donut\nThomas: No it's Tiphaine I saw her!"
-        # On récupere le script uniquement si le film est choisi
-
-        # Communication avec l'API The Movie DataBase pour connaître les genres du film
-        # print(f"Récupération des genres")
-
-        # TODO : plus tard, le faire en asynchrone pour être plus rapide
-
-        result = tmdb_api.search_movie(title)
-        movie = None
-        # Si le film a été trouvé sur le site
-        if result is not None:
-            movie = Movie(title=result.title,
-                          genres=result.genres,lien=data[title])
-
-            # On ajoute les genres de ce film à l'index
-            for genre in result.genres:
-                if genre not in movies_by_genre:
-                    movies_by_genre[genre] = []
-                movies_by_genre[genre].append(movie)
-        # Sinon, on ne connaît pas ses genres
-        # TODO : voir si on prend les genres présents sur le site de script
-        else:
-            movie = Movie(title=title, genres=[],lien=data[title])
-            if UNKNOWN_GENRE not in movies_by_genre:
-                movies_by_genre[UNKNOWN_GENRE] = []
-            movies_by_genre[UNKNOWN_GENRE].append(movie)
-
-        # print(movie)
-        # all_movies.append(movie)
-
+    # On extraie seulement les genres et les titres pour le test
+    movies_by_genre = { genre: list(data[genre]) for genre in data }
 
     nb_panels = 2
     interface = Interface(nb_panels, movies_by_genre) # bloquant

@@ -11,7 +11,7 @@ from Movie import PartialMovie
 # soup2.find(class_="script-details")
 # soup2.find_all("tr")[1]
 # soup2.find_all("td")[1]
-# lienScript = soup2.find_all("a")[-1]
+# script_url = soup2.find_all("a")[-1]
 
 SITE = "https://imsdb.com/"
 SESSION = requests.Session()  # Garde la même session pour les requêtes (+ rapide)
@@ -19,61 +19,57 @@ SESSION = requests.Session()  # Garde la même session pour les requêtes (+ rap
 
 def getName():
     """
-    Renvoie un dictionnaire qui associe le nom d'un film
-    (str) à un dict { url: str, genres: list }
+    Renvoie un dictionnaire de dictionnaires de la forme :
+    {
+        "genre_1": {
+            "film_1": "url_script_1",
+            "film_2": "url_script_2"
+        },
+        "genre_2": {
+            "film_2": "url_script_2",
+            "film_3": "url_script_3"
+        },
+        …
+    }
     """
-    # TODO : Renommer suivant PEP 8 ;)
-    # TODO : Renommer les variables en anglais
 
-    def parse_tag_in_thread(tag):
+    def parse_genre_in_thread(genre):
         """
-        Traite le script du film dont l'url
-        est passé en paramètre dans un thread
+        Traite le genre passé en paramètre dans un thread
         """
-        movie_title = tag.a["title"]
-        movie_url = SITE + tag.a["href"][1:]  # Le href commence par un slash
+        genre_url = SITE + "genre/" + genre
 
-        script_url = movie_url # test pour voir si c'est bcp plus rapide sans cette requête => OUI
-        # script_url = get_script_url(movie_url)
-        # Si le script est accessible
-        if script_url is not None: # test pour voir si c'est bcp plus rapide sans tester => PAS TANT
-        # if script_url is not None and is_valid_url(script_url):
+        req = requests.get(genre_url)
+        # On ne traite que les balises <p>
+        only_p_tags = SoupStrainer("p")
+        movies_tags = BeautifulSoup(req.text, "html.parser", parse_only=only_p_tags)
+
+        current_genre = {}
+        for movie_tag in movies_tags:
+            movie_title = movie_tag.a["title"]
+            movie_url = SITE + movie_tag.a["href"][1:] # Le href commence par un slash
+
             # Pour enlever le " Script" a la fin du nom du film
             if movie_title.endswith(" Script"):
                 movie_title = movie_title[:-7]
-            # " ".join(movie_title.split(" ")[:-1])
+            # movie_title = " ".join(movie_title.split(" ")[:-1])
 
-            # TODO : Récupérer les genres
-            genres = ["Test_genre_1", "Test_genre_2"]
+            current_genre[movie_title] = movie_url
+        
+        result[genre] = current_genre
 
-            print(f"{movie_title} ✅ ({script_url})")
-            # pass
-            data[movie_title] = {"url": script_url, "genres": genres}
-        else:
-            print(f"{movie_title} ❌")
-            # pass
 
-    url = SITE + "all-scripts.html"
+    listeGenres = ["Action", "Adventure", "Animation", "Comedy", "Crime", 
+                   "Drama", "Family", "Fantasy", "Fiml-Noir", "Horror", 
+                   "Musical", "Mystery", "Romance", "Sci-Fi", "Short", 
+                   "Thriller", "War", "Western"]    
+    result = {}
 
-    req = SESSION.get(url)
-    # Contient le code HTML
-    # soup = BeautifulSoup(req.text, "html.parser")
-
-    # TODO : Demander à Thomas à quoi servent ces lignes
-    # soup.find(id="maindoby")
-    # soup.find_all("table")[1]
-    # soup.tbody
-    # soup.tr
-    only_p_tags = SoupStrainer("p")
-    tags = BeautifulSoup(req.text, "html.parser", parse_only=only_p_tags)
-    # tags = soup.find_all("p")
-
-    data = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Mappe chaque tag à parse_tag_in_thread
-        executor.map(parse_tag_in_thread, tags)
+        # Mappe chaque genre à parse_genre_in_thread
+        executor.map(parse_genre_in_thread, listeGenres)        
 
-    return data
+    return result
 
 
 def get_script_url(movie_url):
@@ -89,7 +85,7 @@ def get_script_url(movie_url):
         # tag.find_all("td")[1]
         a = tag.find_all("a")[-1]
 
-        return SITE + a["href"]  # L'url est un chemin relatif sur le site
+        return SITE + a["href"][1:] # L'url est un chemin relatif sur le site
     else:
         return None
 
@@ -121,12 +117,15 @@ def getScript(movie_url):
 
 def main():
     data = getName()
-    print(len(data))
-    print(data)
+    print(f"Nombre de genres : {len(data)}")
+    # print(data)
 
-    title = "30 Minutes or Less"
-    movie = getScript(data[title]["url"])
-    # print(movie.script)
+    genre = "Action"
+    first_movie_title = list(data[genre])[0]
+    first_movie_url = data[genre][first_movie_title]
+    print(f"Titre du premier film du genre '{genre}' : '{first_movie_title}'")
+    print(f"URL de sa page : {first_movie_url}")
+    print(f"URL de son script : {get_script_url(first_movie_url)}")
 
 
 if __name__ == "__main__":
