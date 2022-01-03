@@ -35,7 +35,12 @@ class Movie:
             soup = BeautifulSoup(req.text, "html.parser")
 
             tag = soup.find(class_="scrtext")
-            self.script = tag.pre
+
+            try:
+                self.script = tag.pre
+            except:
+                return self.script # Equivalent a return None du coup
+            
         
         return self.script
 

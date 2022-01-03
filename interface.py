@@ -5,15 +5,17 @@ import tmdb_api
 import recuperationNomFilm as rnf
 
 
-UNKNOWN_GENRE = "Unknown" # Genre pour les films dont on ne connaît pas le genre
+UNKNOWN_GENRE = "Unknown"  # Genre pour les films dont on ne connaît pas le genre
 
 
 """
 TODO : mettre les récupérations etc dans leur propre script
 """
 
+
 class Interface:
     """Interface complète à instancier"""
+
     def __init__(self, nb_panels, movies_by_genre):
         self._nb_panels = nb_panels
         self._movies_by_genre = movies_by_genre
@@ -23,16 +25,16 @@ class Interface:
 
         # Crée une liste de taille `nb_panels` contenant des objets Panel
         self._panels = [Panel(
-                            self._movies_by_genre, self._root,
-                            bg="#bbb", width=200, height=150,
-                            padx=10, bd=5
-                        ) for _ in range(self._nb_panels)]
+            self._movies_by_genre, self._root,
+            bg="#bbb", width=200, height=150,
+            padx=10, bd=5
+        ) for _ in range(self._nb_panels)]
 
         for panel in self._panels:
             # Faire ici les trucs à faire pour chaque panneau
             panel.pack()
 
-        self._root.mainloop() # Bloquant
+        self._root.mainloop()  # Bloquant
 
 
 class Panel(tk.Frame):
@@ -42,6 +44,7 @@ class Panel(tk.Frame):
         - Deux labels (tk.Label), un par liste déroulante pour décrire ce que l'utilisateur doit faire
         - Un bouton (tk.Button) pour valider la sélection
     """
+
     def __init__(self, movies_by_genre, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -51,13 +54,13 @@ class Panel(tk.Frame):
         self._genre_label = tk.Label(self, text="Pick a genre :")
         self._genre_label.pack(side=tk.TOP)
 
-        self._cbb_genre = ttk.Combobox(self, values=list(self._movies_by_genre))
-        self._cbb_genre.current(0) # L'élément par défaut sera le 1er
+        self._cbb_genre = ttk.Combobox(
+            self, values=list(self._movies_by_genre))
+        self._cbb_genre.current(0)  # L'élément par défaut sera le 1er
         self._cbb_genre.pack(side=tk.TOP)
 
         # Action associée à la sélection d'un genre
         self._cbb_genre.bind("<<ComboboxSelected>>", self._update_cbb_movies)
-
 
         # Film
         self._movie_label = tk.Label(self, text="Pick a movie :")
@@ -65,17 +68,17 @@ class Panel(tk.Frame):
 
         self._cbb_movie = ttk.Combobox(self)
         self._update_cbb_movies()
-        self._cbb_movie.current(0) # L'élément par défaut sera le 1er
+        self._cbb_movie.current(0)  # L'élément par défaut sera le 1er
         self._cbb_movie.pack(side=tk.TOP)
 
-
         # Bouton pour valider
-        self._ok_button = tk.Button(self, text="Ok", command=self._ok_button_action)
+        self._ok_button = tk.Button(
+            self, text="Ok", command=self._ok_button_action)
         self._ok_button.pack(side=tk.TOP)
 
     def pack(self):
         """Écrase la méthode `pack()` des tk.Frame"""
-        super().pack(side=tk.LEFT) # Les panneaux seront pack de gauche à droite
+        super().pack(side=tk.LEFT)  # Les panneaux seront pack de gauche à droite
         # pack les autres éléments aussi je pense
 
     def _update_cbb_movies(self, evt=None):
@@ -85,7 +88,7 @@ class Panel(tk.Frame):
         """
         # print(f"Sélectionné : {self._cbb_genre.get()}")
         self._cbb_movie["values"] = self._movies_by_genre[self._cbb_genre.get()]
-        self._cbb_movie.current(0) # L'élément par défaut sera le 1er
+        self._cbb_movie.current(0)  # L'élément par défaut sera le 1er
 
     def _ok_button_action(self):
         """Action sur pression du bouton Ok"""
@@ -115,7 +118,7 @@ def main():
     data = rnf.getName()
 
     # all_movies = [] # Liste de tous les objets Movie
-    movies_by_genre = {} # Associe un genre (str) à une liste d'objets Movie
+    movies_by_genre = {}  # Associe un genre (str) à une liste d'objets Movie
 
     acc = 0
     # Conversion en objets Movie
@@ -124,7 +127,7 @@ def main():
         acc += 1
         # print(f"Récupération des informations du film : {title}")
 
-        # Récupération du script sur la page html    
+        # Récupération du script sur la page html
         # print(f"Récupération du script")
 
         ### pour le test ###
@@ -141,7 +144,7 @@ def main():
         # Si le film a été trouvé sur le site
         if result is not None:
             movie = Movie(title=result.title,
-                          genres=result.genres,lien=data[title])
+                          genres=result.genres, lien=data[title])
 
             # On ajoute les genres de ce film à l'index
             for genre in result.genres:
@@ -151,7 +154,7 @@ def main():
         # Sinon, on ne connaît pas ses genres
         # TODO : voir si on prend les genres présents sur le site de script
         else:
-            movie = Movie(title=title, genres=[],lien=data[title])
+            movie = Movie(title=title, genres=[], lien=data[title])
             if UNKNOWN_GENRE not in movies_by_genre:
                 movies_by_genre[UNKNOWN_GENRE] = []
             movies_by_genre[UNKNOWN_GENRE].append(movie)
@@ -159,10 +162,36 @@ def main():
         # print(movie)
         # all_movies.append(movie)
 
+    nb_panels = 2
+    interface = Interface(nb_panels, movies_by_genre)  # bloquant
+
+
+def main2():
+    """
+    Simulation de ce qu'un script regroupant la
+    récupération des données et l'affichage ferait
+    """
+    
+
+    data = rnf.getName()
+
+    # all_movies = [] # Liste de tous les objets Movie
+    movies_by_genre = {}  # Associe un genre (str) à une liste d'objets Movie
+
+    # Conversion en objets Movie
+    for genre in data:
+        dico = data[genre] # Le dico des films avec le lien du script { nomFilm : lienScript }
+
+        movies_by_genre[genre] = []
+        for nomFilm in dico:
+            movie = Movie(title=nomFilm,
+                        genres=genre, lien=dico[nomFilm])
+            movies_by_genre[genre].append(movie)
 
     nb_panels = 2
-    interface = Interface(nb_panels, movies_by_genre) # bloquant
+    interface = Interface(nb_panels, movies_by_genre)  # bloquant
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    main2()

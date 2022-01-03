@@ -14,32 +14,44 @@ SITE = "https://imsdb.com/"
 
 def getName():
     """
-    Renvoie un dico avec en clé le nom de tous les films disponibles sur la page et en valeur un url permettant 
-    d'acceder a une page qui elle même possède l'url du script
+    Renvoie un dico de dico. Forme: { genre1 : {nomFilm : lienScript} , genre2 : {nomFilm : lienScript} , ... }
+    lienScript : un url permettant d'acceder a une page qui elle même possède l'url du script
     """
-    url = SITE + "all-scripts.html"
 
-    req = requests.get(url)
-    # soup contient le code HTML de url
-    soup = BeautifulSoup(req.text, "html.parser")
+    listeGenre = ["Action", "Adventure", "Animation", "Comedy", "Crime", 
+                  "Drama", "Family", "Fantasy", "Fiml-Noir", "Horror", 
+                  "Musical", "Mystery", "Romance", "Sci-Fi", "Short", 
+                  "Thriller", "War", "Western"]
+    
+    grandDico = {}
 
-    soup.find(id="maindoby")
-    soup.find_all("table")[1]
-    soup.tbody
-    soup.tr
-    tag = soup.find_all("p")
+    for genre in listeGenre:
 
-    dico = {}
-    for t in tag:
-        nomFilm = t.a["title"]
-        lien = SITE + t.a["href"]
+        url = SITE + "genre/" + genre
 
-        # Pour enlever le "Script" a la fin du nom du film
-        nomFilm = " ".join(nomFilm.split(" ")[:-1])
+        req = requests.get(url)
+        # soup contient le code HTML de url
+        soup = BeautifulSoup(req.text, "html.parser")
 
-        dico[nomFilm] = SITE + lien
+        soup.find(id="maindoby")
+        soup.find_all("table")[1]
+        soup.tbody
+        soup.tr
+        tag = soup.find_all("p")
 
-    return dico
+        dico = {}
+        for t in tag:
+            nomFilm = t.a["title"]
+            lien = SITE + t.a["href"]
+
+            # Pour enlever le "Script" a la fin du nom du film
+            nomFilm = " ".join(nomFilm.split(" ")[:-1])
+
+            dico[nomFilm] = SITE + lien
+        
+        grandDico[genre] = dico
+
+    return grandDico
 
 
 # def getScript(url):
@@ -71,8 +83,7 @@ def getName():
 def main():
 
     dico = getName()
-    texte = getScript(dico["30 Minutes or Less"])
-    print(str(texte))
+    print(dico.keys())
 
 
 if __name__ == "__main__":
