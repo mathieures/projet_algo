@@ -97,9 +97,9 @@ def get_script_url(movie_url):
         return None
 
 
-def is_valid_url(url):
-    """Retourne True si l'url est accessible, False sinon"""
-    return True if SESSION.head(url).status_code == 200 else False
+# def is_valid_url(url):
+#     """Retourne True si l'url est accessible, False sinon"""
+#     return True if SESSION.head(url).status_code == 200 else False
 
 
 def getScript(movie_url):
@@ -107,7 +107,7 @@ def getScript(movie_url):
     Prend en paramètre l'url du film et retourne le script associé à ce film
     """
     script_url = get_script_url(movie_url)
-    if script_url is not None and is_valid_url(script_url):
+    if script_url is not None:
         # On demande le contenu de la page
         req = SESSION.get(script_url)
 
