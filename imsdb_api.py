@@ -59,15 +59,22 @@ def getName():
         result[genre] = current_genre
 
 
-    listeGenres = ["Action", "Adventure", "Animation", "Comedy", "Crime", 
-                   "Drama", "Family", "Fantasy", "Fiml-Noir", "Horror", 
-                   "Musical", "Mystery", "Romance", "Sci-Fi", "Short", 
-                   "Thriller", "War", "Western"]    
-    result = {}
+    # Récupération du nom des genres :
 
+    req = requests.get(SITE)
+
+    only_table_tags = SoupStrainer("table")
+    soup = BeautifulSoup(req.text, "html.parser", parse_only=only_table_tags)
+
+    genres_table = soup.find_all("table")[4] # Les genres se trouve sur la 5ième table de la page
+    a_tags = genres_table.find_all("a")
+
+    all_genres = [a.string for a in a_tags]
+
+    result = {}
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Mappe chaque genre à parse_genre_in_thread
-        executor.map(parse_genre_in_thread, listeGenres)        
+        executor.map(parse_genre_in_thread, all_genres)        
 
     return result
 
