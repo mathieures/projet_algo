@@ -22,7 +22,7 @@ MOVIES_BY_GENRE = {} # Associe un genre (str) à une liste d'objets Movie
 
 
 
-def parse_movie(title, movie_url, index=0):
+def parse_movie_in_thread(title, movie_url, index=0):
     global NB_PARSED_MOVIES
     global MOVIES_BY_GENRE
 
@@ -83,7 +83,7 @@ def main():
         """
         threads = [
             threading.Thread(
-                target=parse_movie,
+                target=parse_movie_in_thread,
                 args=(title, data[title], i)
             ) for i, title in enumerate(data, start=1)
         ]
