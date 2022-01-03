@@ -96,8 +96,7 @@ def main():
     import imsdb_api
     
     # Récupération des données sur le site de scénarios
-
-    data = imsdb_api.getName() # movies_by_genre doit contenir des objets Movie ou PartialMovie, à voir
+    data = imsdb_api.getName()
 
     # On extraie seulement les genres et les titres pour le test
     movies_by_genre = { genre: list(data[genre]) for genre in data }

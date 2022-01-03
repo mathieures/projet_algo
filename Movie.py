@@ -9,14 +9,14 @@ class PartialMovie:
     pas encore récolté toutes les informations
     """
 
-    @staticmethod
-    def _get_genres_from_dict(dict_):
-        """
-        Retourne une liste des genres sous forme de str, car
-        l'API ne nous les fournit pas sous une forme exploitable
-        """
-        # TODO : à supprimer une fois que les genres seront récupérés sur le site des scripts
-        return [genre["name"] for genre in dict_["genres"]]
+    # @staticmethod
+    # def _get_genres_from_dict(dict_):
+    #     """
+    #     Retourne une liste des genres sous forme de str, car
+    #     l'API ne nous les fournit pas sous une forme exploitable
+    #     """
+    #     # TODO : à supprimer une fois que les genres seront récupérés sur le site des scripts
+    #     return [genre["name"] for genre in dict_["genres"]]
 
     @classmethod
     def from_dict(cls, dict_):
@@ -28,7 +28,8 @@ class PartialMovie:
             budget=dict_.get("budget"),
             date=dict_.get("release_date"),
             duration=dict_.get("runtime"),
-            genres=cls._get_genres_from_dict(dict_), # TODO : à modif une fois _get_genres_from_dict supprimée
+            genres=dict_.get("genres"),
+            # genres=cls._get_genres_from_dict(dict_),
             id=dict_.get("id"),
             note=dict_.get("vote_average"),
             title=dict_.get("title"),
@@ -73,8 +74,9 @@ class PartialMovie:
         self.duration = duration
         self.note = note
 
-    def __str__(self):
-        return f"{type(self).__name__}: {self.title}"
+    def __repr__(self):
+        """Représentation utilisée notamment par tkinter pour l'affichage"""
+        return f"{self.title}"
 
 
 class Movie(PartialMovie):
@@ -142,9 +144,9 @@ class Movie(PartialMovie):
                Budget : {self.budget}
                Date : {self.date}
                Duration : {self.duration}
-               Genres : {self.genres}
-               Note : {self.note}
-               Script length: {len(self._script)} characters"""
+               Genres : {", ".join(self.genres)}
+               Note : {self.note}"""
+               # Script length: {len(self._script)} characters"""
 
 
 def main():

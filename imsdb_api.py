@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup, SoupStrainer
-import threading
 import concurrent.futures
 import requests
 from Movie import PartialMovie
@@ -60,7 +59,6 @@ def getName():
 
 
     # Récupération du nom des genres :
-
     req = requests.get(SITE)
 
     only_table_tags = SoupStrainer("table")
