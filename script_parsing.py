@@ -4,43 +4,22 @@ import re
 
 
 def remove_b_tags(string):
-    # Tout ce qui est de la forme <b> ... </b>
-    # reg = re.compile("<b>[ \w0-9-\n]*</b>")
-    # reg = re.compile("<b>[^\(</b>\)]*</b>")
-    # reg = re.compile("<b>[^<]*</b>")
-    reg = re.compile("<b>[^\(</b>\)]</b>")
-    res = reg.finditer(string)
-    for i in res:
-        print("######")
-        start, end = i.span()
-        string = string[:start] + string[end+1:]
-    return string
-
-def remove_b_tags(string):
-    # start = 0
-    # end = 0
-    # motDebut = "<b>"
-    # debutOk = False
-    # motFin = "</b>"
-    # finOk = False
-    # acc = ""
-    # for c in string:
-    #     if c == "<":
-    #         acc += "<"
-    #         if not(motDebut.startswith(acc)):
-
-
-    # for c in 
+    """
+        Fonction qui enlève les balise <b> ainsi que leur contenue
+    """
     startString = "<b>"
     endString = "</b>"
     start = string.find(startString)
     end = string.find(endString)
+    # On vérifie pas que </b> existe bien car on part du principe que la chaine est
+    # bien formée (càd que toute balise <b> est fermée par une balise </b>)
     while start != -1:
         string = string[:start] + string[end+len(endString):]
         start = string.find(startString)
-        end = string.find(endString)    
+        end = string.find(endString)
 
     return string
+
 
 def remove_tags(string):
     """Enlève les balises de la chaîne passée en paramètre"""
