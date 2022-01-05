@@ -3,8 +3,13 @@ import tkinter as tk
 
 class Interface:
     """Interface complète à instancier"""
+
+    @property
+    def nb_panels(self):
+        return len(self._panels)
+
+
     def __init__(self, nb_panels, movies_by_genre):
-        self._nb_panels = nb_panels
         self._movies_by_genre = movies_by_genre
 
         # Instanciation des éléments graphiques
@@ -15,28 +20,22 @@ class Interface:
         self._bottom_frame.pack(side=tk.BOTTOM, anchor="se") # En bas à droite
 
         # Bouton pour ajouter un panneau
-        self._add_panel_button = tk.Button(self._bottom_frame, text="+", command=self.add_panel)
+        self._add_panel_button = tk.Button(self._bottom_frame, text="+",
+                                           command=self.add_panel, width=2)
         self._add_panel_button.pack()
 
         # Crée une liste de taille `nb_panels` contenant des objets Panel
         self._panels = []
-        for _ in range(self._nb_panels):
+        for _ in range(nb_panels):
             self.add_panel()
 
-        for panel in self._panels:
-            # Faire ici les trucs à faire pour chaque panneau
-            panel.pack()
 
         self._root.mainloop() # Bloquant
 
 
     def add_panel(self):
-        self._nb_panels += 1
-        new_panel = Panel(
-            self._root, bg="#bbb",
-            width=500, height=300,
-            padx=10, bd=5
-        )
+        """Ajoute un Panel à l'interface"""
+        new_panel = Panel(self._root)
         self._panels.append(new_panel)
         new_panel.pack()
 
@@ -44,12 +43,28 @@ class Interface:
 class Panel(tk.Frame):
     """
     Classe décrivant un "panneau", élément de l'interface qui contient :
-        - Deux listes déroulantes (ttk.Combobox), une pour le genre de film et une pour le titre du film
-        - Deux labels (tk.Label), un par liste déroulante pour décrire ce que l'utilisateur doit faire
-        - Un bouton (tk.Button) pour valider la sélection
+    # TODO : remplir la docstring avec ce qu'il y a dans un Panel
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent_frame):
+        super().__init__(
+            parent_frame, bg="#bbb",
+            width=500, height=300,
+            padx=10, bd=5
+        )
+
+        # Cadre du haut
+        self._top_frame = tk.Frame(self)
+        self._top_frame.pack(side=tk.TOP, anchor="ne")
+
+        # Bouton pour supprimer un Panel
+        self._destroy_button = tk.Button(self._top_frame, text="-",
+                                         command=self.destroy, width=2)
+        self._destroy_button.pack()
+
+        # Canvas où le graphe ira
+        # TODO : Modifier les dimensions pour qu'elles soient pratiques
+        self._canvas = tk.Canvas(self, width=150, height=150, bg="red")
+        self._canvas.pack(side=tk.BOTTOM)
 
 
     def pack(self):
