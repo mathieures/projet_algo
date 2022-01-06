@@ -60,19 +60,19 @@ class PartialMovie:
                  duration=None,
                  genres=None,
                  id=None,
+                 movie_url=None,
                  note=None,
                  title=None,
-                 script=None,
-                 movie_url=None):
-        self.title = title
-        self.genres = genres
-        self.movie_url = movie_url
-        self.script = script
+                 script=None):
         self.budget = budget
-        self.id = id
         self.date = date
         self.duration = duration
+        self.genres = genres
+        self.id = id
+        self.movie_url = movie_url
         self.note = note
+        self.title = title
+        self.script = script # objet Script
 
     def __repr__(self):
         """Représentation utilisée notamment par tkinter pour l'affichage"""
@@ -82,8 +82,8 @@ class PartialMovie:
 class Movie(PartialMovie):
     """
     Classe pour un résultat après l'appel aux APIs,
-    qui contient toutes les informations utiles,
-    prêt pour le traitement du script
+    qui contient toutes les informations utiles après
+    le traitement du script.
     """
 
     @classmethod
@@ -95,10 +95,10 @@ class Movie(PartialMovie):
             duration=pm.duration,
             genres=pm.genres,
             id=pm.id,
+            movie_url=pm.movie_url,
             note=pm.note,
             title=pm.title,
-            # script=pm.script,
-            movie_url=pm.movie_url
+            script=pm.script
         )
 
     @classmethod
@@ -120,20 +120,20 @@ class Movie(PartialMovie):
                  duration,
                  genres,
                  id,
+                 movie_url,
                  note,
                  title,
-                 # script,
-                 movie_url):
+                 script):
         super().__init__(
             budget=budget,
             date=date,
             duration=duration,
             genres=genres,
             id=id,
+            movie_url=movie_url,
             note=note,
             title=title,
-            # script=script,
-            movie_url=movie_url)
+            script=script) # objet Script
 
     def __str__(self):
         """
@@ -145,8 +145,8 @@ class Movie(PartialMovie):
                Date : {self.date}
                Duration : {self.duration}
                Genres : {", ".join(self.genres)}
-               Note : {self.note}"""
-               # Script length: {len(self._script)} characters"""
+               Note : {self.note}
+               Number of unique words: {len(self.words)} words"""
 
 
 def main():

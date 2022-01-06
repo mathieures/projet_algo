@@ -1,5 +1,6 @@
 import imsdb_api
 import tmdb_api
+import script_parsing
 from interface import Interface
 import Movie
 
@@ -8,32 +9,32 @@ import os
 
 
 SAVE_FILE_NAME = "movies_by_genre.pkl"
-MOVIES_BY_GENRE = {} # Associe un genre (str) à une liste d'objets Movie
+MOVIES = [] # Temporairement, liste d'objets PartialMovie pour le test
+# MOVIES = [] # Liste d'objets Movie, complètement traités
 
 
 def main():
-    global NB_MOVIES
-    global MOVIES_BY_GENRE
+    global MOVIES
 
     # Récupération des données sur le site de scénarios
     data = imsdb_api.getName()
-    # Associe un genre à un dictionnaire { "nom_film_1": "url_film_1", … }
+    # Associe les noms de film à l'url de leur page IMSDB.
 
     # Conversion en objets PartialMovie
-    for genre, movies in data.items():
-        # Pour chaque film du genre actuel
-        for title in movies:
-            # S'il n'y avait pas ce genre dans le dictionnaire
-            if genre not in MOVIES_BY_GENRE:
-                MOVIES_BY_GENRE[genre] = []
-            # Dans tous les cas on l'ajoute à la liste
-            MOVIES_BY_GENRE[genre].append(
-                Movie.PartialMovie(
-                    title=title,
-                    genres=genre,
-                    movie_url=movies[title]
-                )
-            ) # Un PartialMovie permet de garder en mémoire son url
+    for movie_title in data:
+        # TODO : voir si on garde l'API ou pas, vu qu'on n'a besoin que du script
+        """
+        # On fait appel à l'API TMDB pour avoir les autres informations
+        movie = tmdb_api.search_movie(movie_title)
+        """
+
+        # On télécharge et traite le script
+        movie = imsdb_api.getScript(data[movie_title])
+
+        # Enfin on ajoute le film à la liste
+        MOVIES.append(
+
+        )
 
     print(MOVIES_BY_GENRE)
 
