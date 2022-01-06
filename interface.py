@@ -1,7 +1,9 @@
 import tkinter as tk
+import matplotlib.pyplot as plt
+from Graph import Graph
+
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 
-from matplotlib.figure import Figure # pour le test
 
 
 class Interface:
@@ -12,7 +14,9 @@ class Interface:
         return len(self._panels)
 
 
-    def __init__(self, nb_panels):
+    def __init__(self, nb_panels, graph_dict):
+        self._graph_dict = graph_dict
+
         # Instanciation des éléments graphiques
         self._root = tk.Tk()
 
@@ -36,7 +40,7 @@ class Interface:
 
     def add_panel(self):
         """Ajoute un Panel à l'interface"""
-        new_panel = Panel(self._root)
+        new_panel = Panel(self._root, self._graph_dict)
         self._panels.append(new_panel)
         new_panel.pack()
 
@@ -46,7 +50,7 @@ class Panel(tk.Frame):
     Classe décrivant un "panneau", élément de l'interface qui contient :
     # TODO : remplir la docstring avec ce qu'il y a dans un Panel
     """
-    def __init__(self, parent_frame):
+    def __init__(self, parent_frame, graph_dict):
         super().__init__(
             parent_frame, bg="#bbb",
             width=500, height=300,
@@ -62,10 +66,8 @@ class Panel(tk.Frame):
                                          command=self.destroy, width=2)
         self._destroy_button.pack()
 
-        # TODO : sûrement initialiser le graphe dès maintenant
-        # pour le test :
-        fig = Figure(figsize=(5, 4), dpi=100)
-        self.plot_graph(fig)
+        self.graph = Graph(dict_=graph_dict)
+        self.plot_graph()
 
     def pack(self):
         """Écrase la méthode `pack()` des tk.Frame"""
@@ -73,8 +75,12 @@ class Panel(tk.Frame):
         # pack les autres éléments aussi je pense
 
 
-    def plot_graph(self, graph_fig):
+    def plot_graph(self):
         # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
+        print("Plot du graphe (plot_graph)")
+        self.graph.create_graph()
+        self.graph.show_graph()
+        graph_fig = self.graph.fig
         self._canvas = FigureCanvasTkAgg(graph_fig, master=self)
         # tk.Canvas(self, width=150, height=150, bg="red")
         self._canvas.get_tk_widget().pack(side=tk.BOTTOM)
@@ -82,6 +88,7 @@ class Panel(tk.Frame):
         toolbar = NavigationToolbar2Tk(self._canvas, self)
         toolbar.pack(side=tk.BOTTOM)
         self._canvas.draw()
+        print("Fin du plot")
 
 
 

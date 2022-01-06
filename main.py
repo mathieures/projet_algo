@@ -1,6 +1,6 @@
 import imsdb_api
 import tmdb_api
-from interface import Interface
+from Interface import Interface
 import Movie
 import Script
 
@@ -54,14 +54,18 @@ def main():
                         # On additionne
                         GRAPH_DICT[word][other_word] += copy_without_word[other_word]
 
+            # A SUPPRIMER
+            print("Fin du traitement du script")
+            break
+
                 # GRAPH_DICT.update(script.parsed_script)
     # Pour pouvoir arrêter le processus si on est pressé
     except KeyboardInterrupt:
         pass
 
-    print("final :", GRAPH_DICT)
+    # print("final :", GRAPH_DICT)
 
-    nb_panels = 2
+    nb_panels = 1
     interface = Interface(nb_panels, GRAPH_DICT)  # bloquant
 
 
