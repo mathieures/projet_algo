@@ -1,7 +1,9 @@
 import script_parsing
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_pydot import write_dot
+from networkx.drawing.nx_pydot import write_dot, read_dot
 import networkx as nx
+
+# https://networkx.org/documentation/stable/reference/classes/multigraph.html
 
 
 class Graph():
@@ -13,8 +15,6 @@ class Graph():
         self.__dico = dico
         self.__graph = graph
 
-    
-    
     def __create_nodes_and_edges(self):
         """
             Methode privée
@@ -36,32 +36,32 @@ class Graph():
 
     def show_graph(self):
         if self.__graph != None:
-            pass
-    
-    def save_graph_as_dot(self):
-        """
-            Methode qui sauvegarde le graphe dans le langage dot
-        """
-        if self.__graph != None:
-            pos = nx.nx_agraph.graphviz_layout(self.__graph)
-            nx.draw(self.__graph, pos=pos)
-            write_dot(self.__graph, 'file.dot')
+            nx.draw(self.__graph, with_labels=True)
+            plt.show()
 
     def save_graph_as_png(self):
         """
             Methode qui sauvegarde le graphe en png
         """
         if self.__graph != None:
-            nx.draw(self.__graph)
+            nx.draw(self.__graph, with_labels=True)
             plt.savefig("graph.png")
 
-    @staticmethod
-    def import_graph(path):
+    # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
+    # def save_graph_as_dot(self):
+    #     """
+    #         Methode qui sauvegarde le graphe dans le langage dot
+    #     """
+    #     if self.__graph != None:
+    #         pos = nx.nx_agraph.graphviz_layout(self.__graph)
+    #         nx.draw(self.__graph, pos=pos)
+    #         write_dot(self.__graph, 'file.dot')
 
-        return Graph(graph=None)
-
-
-
+    # @staticmethod
+    # def import_graph(path):
+    #     graph = read_dot(path)
+    #     return Graph(graph=graph)
+    # --------------------------------------------------------------------------------------------------------------------
 
 
 def graph_from_dict(dico):
@@ -91,10 +91,10 @@ def graph_from_dict(dico):
 
     G.add_weighted_edges_from(edges)
 
-    pos=nx.spring_layout(G)
+    pos = nx.spring_layout(G)
     nx.draw(G, pos, with_labels=True, font_weight='bold')
-    edge_weight = nx.get_edge_attributes(G,'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels = edge_weight)
+    edge_weight = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_weight)
     plt.show()
 
     # plt.figure(figsize=(6, 6))
@@ -118,43 +118,15 @@ def main():
     graph_from_dict(dico)
 
 
-def test(dico):
-    G = nx.MultiDiGraph()
-    # Liste des sommets
-    nodes = list(set(dico.keys()))
-    # Liste des aretes sous forme de tuple
-    edges = []
+def test():
+    G = nx.Graph()
+    G.add_edge(1, 2)
+    G.add_edge(1, 3)
 
-    # G.add_nodes_from(nodes)
-
-    previousWord = ""
-    for word in dico:
-        if not(previousWord == ""):
-            if (previousWord, word) not in edges:
-                # G.add_weighted_edge(previousWord,word,1)
-                G.add_weighted_edges_from([(previousWord, word, 1)])
-                edges.append((previousWord, word))
-
-        previousWord = word
-
-    # pos=nx.spring_layout(G)
-    # nx.draw(G, pos, with_labels=True, font_weight='bold')
-    # edge_weight = nx.get_edge_attributes(G,'weight')
-    # nx.draw_networkx_edge_labels(G, pos, edge_labels = edge_weight)
-    # plt.show()
-
-    plt.figure(figsize=(6, 6))
-
-    pos = nx.spring_layout(G)
-    nx.draw_networkx_nodes(G, pos)
-    nx.draw_networkx_labels(G, pos)
-
-    for edge in G.edges(data=True):
-        nx.draw_networkx_edges(G, pos, edgelist=[(edge[0], edge[1])])
-
-    plt.show()
+    graph = Graph(graph=G)
+    graph.show_graph()
 
 
 if __name__ == "__main__":
-    main()
-    # test()
+    # main()
+    test()
