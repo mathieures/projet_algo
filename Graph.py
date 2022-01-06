@@ -1,4 +1,3 @@
-import script_parsing
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import write_dot, read_dot
 import networkx as nx
@@ -8,66 +7,60 @@ import networkx as nx
 
 class Graph():
 
-    def __init__(self, dico=None, graph=None):
-        """
-            Le graphe peut soit être généré grâce a un dico 
-        """
-        self.__dico = dico
-        self.__graph = graph
-        if graph is None:
-            if dico != None:
-                edges = self.__create_nodes_and_edges()
-                G = nx.Graph()
-                G.add_weighted_edges_from(edges)
-                del edges
-                self.__graph = G
+    @property
+    def nodes(self):
+        return list(self._graph)
 
-    def __create_nodes_and_edges(self):
+    @property
+    def edges(self):
+        return self._graph.edges()   
+
+    def __init__(self, graph_dict=None, graph=None):
         """
-            Methode privée
-            Methode qui créé la liste des sommets et des arêtes puis les renvoies sous forme de tuple
+            Le graphe peut soit être généré grâce a un dict
         """
-        # nodes = list(set(self.__dico.keys()))
+        self._graph_dict = graph_dict
+        self._graph = graph
+        if graph is None:
+            if self._graph_dict is not None:
+                self._graph = nx.Graph()
+                self._set_edges()
+
+
+    def _set_edges(self):
+        """Affecte les arêtes au graphe"""
         # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
         edges = []
-        for word in self.__dico:
-            for wordLinkedTo in self.__dico[word]:
-                edges.append(
-                    (word, wordLinkedTo, self.__dico[word][wordLinkedTo]))
+        for word in self._graph_dict:
+            for other_word in self._graph_dict[word]:
+                edges.append((word, other_word, self._graph_dict[word][other_word]))
 
             # Pour libérer de la mémoire
-            # del self.__dico[word]
+            # del self._graph_dict[word]
 
         # return (nodes, edges)
-        return edges
+        # Les sommets sont créés automatiquement
+        self._graph.add_weighted_edges_from(edges)
 
-    def getNodes(self):
-        return list(self.__graph)
 
-    def getEdges(self):
-        return self.__graph.edges()
-
-    def __draw(self):
-        """
-            Factorisation de code
-        """
-        pos = nx.spring_layout(self.__graph)
-        nx.draw(self.__graph, pos, with_labels=True, font_weight='bold')
-        edge_weight = nx.get_edge_attributes(self.__graph, 'weight')
+    def _draw(self):
+        """Charge la figure en mémoire"""
+        pos = nx.spring_layout(self._graph)
+        nx.draw(self._graph, pos, with_labels=True, font_weight='bold')
+        edge_weight = nx.get_edge_attributes(self._graph, 'weight')
         nx.draw_networkx_edge_labels(
-            self.__graph, pos, edge_labels=edge_weight)
+            self._graph, pos, edge_labels=edge_weight)
 
     def show(self):
-        if self.__graph is not None:
-            self.__draw()
+        """Affiche le graphe"""
+        if self._graph is not None:
+            self._draw()
             plt.show()
 
     def save_as_png(self):
-        """
-            Methode qui sauvegarde le graphe en png
-        """
-        if self.__graph is not None:
-            self.__draw()
+        """Sauvegarde le graphe au format png"""
+        if self._graph is not None:
+            self._draw()
             plt.savefig("graph.png")
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
@@ -81,10 +74,10 @@ class Graph():
     #     """
     #         Methode qui sauvegarde le graphe dans le langage dot
     #     """
-    #     if self.__graph != None:
-    #         pos = nx.nx_agraph.graphviz_layout(self.__graph)
-    #         nx.draw(self.__graph, pos=pos)
-    #         write_dot(self.__graph, 'file.dot')
+    #     if self._graph != None:
+    #         pos = nx.nx_agraph.graphviz_layout(self._graph)
+    #         nx.draw(self._graph, pos=pos)
+    #         write_dot(self._graph, 'file.dot')
     #
     # --------------------------------------------------------------------------------------------------------------------
 
@@ -136,13 +129,13 @@ class Graph():
 
 def main():
     # string = "Salut mathieu comment ça va dis donc, parce ce que moi ça va super aujourd'hui mathieu"
-    # dico = script_parsing.parse_script(
+    # graph_dict = script_parsing.parse_script(
     #     script_parsing._remove_tags(script_parsing._remove_b_tags(string)))
-    # On se repose sur le fait que les dico en python grade en mémoire l'ordre des clés (ce n'est pas un ensemble)
-    # graph_from_dict(dico)
-    dico = {"salut": {"bonjour": 2, "ok": 3, "prout": 3}, "bonjour": {
+    # On se repose sur le fait que les dict sauvegardent l'ordre d'insertion depuis 3.7
+    # graph_from_dict(graph_dict)
+    graph_dict = {"salut": {"bonjour": 2, "ok": 3, "prout": 3}, "bonjour": {
         "ok": 4}, "ok": {"prout": 2, "bonjour": 2}, "prout": {"ok": 5}}
-    graph = Graph(dico=dico)
+    graph = Graph(graph_dict=graph_dict)
     graph.show()
 
 
