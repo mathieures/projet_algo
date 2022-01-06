@@ -20,18 +20,14 @@ class Graph():
             Methode privée
             Methode qui créé la liste des sommets et des arêtes puis les renvoies sous forme de tuple
         """
-        if self.__graph != None:
-            nodes = list(self.__dico.keys())
-            # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
-            edges = []
-            for word in self.__dico:
-                for wordLinkedTo in self.__dico[word]:
-                    edges.append((word,wordLinkedTo,1))
+        nodes = list(set(self.__dico.keys()))
+        # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
+        edges = []
+        for word in self.__dico:
+            for wordLinkedTo in self.__dico[word]:
+                edges.append((word, wordLinkedTo, 1))
 
-            return nodes, edges
-            
-        return None
-
+        return (nodes, edges)
 
     def create_graph(self):
         """
@@ -40,7 +36,7 @@ class Graph():
         if self.__dico != {}:
             nodes, edges = self.__create_nodes_and_edges()
 
-            G = nx.MultiGraph()
+            G = nx.Graph()
             G.add_nodes_from(nodes)
             G.add_weighted_edges_from(edges)
             self.__graph = G
@@ -50,7 +46,8 @@ class Graph():
             pos = nx.spring_layout(self.__graph)
             nx.draw(self.__graph, pos, with_labels=True, font_weight='bold')
             edge_weight = nx.get_edge_attributes(self.__graph, 'weight')
-            nx.draw_networkx_edge_labels(self.__graph, pos, edge_labels=edge_weight)
+            nx.draw_networkx_edge_labels(
+                self.__graph, pos, edge_labels=edge_weight)
             plt.show()
 
     def save_graph_as_png(self):
@@ -61,7 +58,8 @@ class Graph():
             pos = nx.spring_layout(self.__graph)
             nx.draw(self.__graph, pos, with_labels=True, font_weight='bold')
             edge_weight = nx.get_edge_attributes(self.__graph, 'weight')
-            nx.draw_networkx_edge_labels(self.__graph, pos, edge_labels=edge_weight)
+            nx.draw_networkx_edge_labels(
+                self.__graph, pos, edge_labels=edge_weight)
             plt.savefig("graph.png")
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
@@ -86,7 +84,7 @@ def graph_from_dict(dico):
         Prend en entrée un dico de mot ainsi que leurs occurences { mot1 : occurences , mot2 : occurences, ... }
         et renvoie le graphe associé (Pour l'instant on va déjà essayer de l'afficher mdr)
     """
-    G = nx.MultiGraph()
+    G = nx.Graph()
     # Liste des sommets
     nodes = list(set(dico.keys()))
     # Liste des aretes sous forme de tuple
@@ -127,22 +125,17 @@ def graph_from_dict(dico):
 
 
 def main():
-    string = "Salut mathieu comment ça va dis donc, parce ce que moi ça va super aujourd'hui mathieu"
-    dico = script_parsing.parse_script(
-        script_parsing._remove_tags(script_parsing._remove_b_tags(string)))
-    # print(dico)
+    # string = "Salut mathieu comment ça va dis donc, parce ce que moi ça va super aujourd'hui mathieu"
+    # dico = script_parsing.parse_script(
+    #     script_parsing._remove_tags(script_parsing._remove_b_tags(string)))
     # On se repose sur le fait que les dico en python grade en mémoire l'ordre des clés (ce n'est pas un ensemble)
-    graph_from_dict(dico)
-
-
-def test():
-    G = nx.Graph()
-    G.add_edges_from([(1, 2), (1, 3), (1,4),(1,4)])
-
-    graph = Graph(graph=G)
+    # graph_from_dict(dico)
+    dico = {"salut": {"bonjour", "ok", "prout"}, "bonjour": {
+        "ok"}, "ok": {"prout", "bonjour"}, "prout": {"ok"}}
+    graph = Graph(dico=dico)
+    graph.create_graph()
     graph.show_graph()
 
 
 if __name__ == "__main__":
-    # main()
-    test()
+    main()
