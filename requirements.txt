@@ -1,1 +1,6 @@
+beautifulsoup4
 bs4
+networkx
+matplotlib
+requests
+
