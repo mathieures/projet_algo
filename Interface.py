@@ -66,7 +66,7 @@ class Panel(tk.Frame):
                                          command=self.destroy, width=2)
         self._destroy_button.pack()
 
-        self.graph = Graph(dict_=graph_dict)
+        self.graph = Graph.from_dict(graph_dict)
         self.plot_graph()
 
     def pack(self):
