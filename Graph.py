@@ -7,13 +7,19 @@ import networkx as nx
 
 class Graph():
 
+    INDEX = 0
+
     @property
     def nodes(self):
         return list(self._graph)
 
     @property
     def edges(self):
-        return self._graph.edges()   
+        return self._graph.edges()  
+
+    @classmethod
+    def from_dict(cls, graph_dict):
+        return cls(graph_dict=graph_dict) 
 
     def __init__(self, graph_dict=None, graph=None):
         """
@@ -21,6 +27,11 @@ class Graph():
         """
         self._graph_dict = graph_dict
         self._graph = graph
+
+        # On nomme la figure pour pouvoir la retrouver ensuite
+        self.fig = plt.figure(f"Graph_{self.INDEX}")
+        self.INDEX += 1
+
         if graph is None:
             if self._graph_dict is not None:
                 self._graph = nx.Graph()
@@ -43,24 +54,41 @@ class Graph():
         self._graph.add_weighted_edges_from(edges)
 
 
-    def _draw(self):
+    def draw(self):
         """Charge la figure en mémoire"""
+        # pour le debug
+        from time import perf_counter
+        print("début draw")
+        print("spring_layout : ", end="") ; t = perf_counter()
         pos = nx.spring_layout(self._graph)
+        print(f"{perf_counter() - t}\n")
+
+        print("nx.draw : ", end="") ; t = perf_counter()
         nx.draw(self._graph, pos, with_labels=True, font_weight='bold')
+        print(f"{perf_counter() - t}\n")
+
+        print("nx.get_edge_attr : ", end="") ; t = perf_counter()
         edge_weight = nx.get_edge_attributes(self._graph, 'weight')
+        print(f"{perf_counter() - t}\n")
+
+        print("nx.draw_networkx_edge_labels : ", end="") ; t = perf_counter()
         nx.draw_networkx_edge_labels(
             self._graph, pos, edge_labels=edge_weight)
+        print(f"{perf_counter() - t}\n")
+        print("fin draw")
 
-    def show(self):
+    def show_in_window(self):
         """Affiche le graphe"""
+        print("début show_in_window")
         if self._graph is not None:
-            self._draw()
+            self.draw()
             plt.show()
+        print("fin show_in_window")
 
     def save_as_png(self):
         """Sauvegarde le graphe au format png"""
         if self._graph is not None:
-            self._draw()
+            self.draw()
             plt.savefig("graph.png")
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
@@ -82,51 +110,6 @@ class Graph():
     # --------------------------------------------------------------------------------------------------------------------
 
 
-# def graph_from_dict(dico):
-#     """
-#         Prend en entrée un dico de mot ainsi que leurs occurences { mot1 : occurences , mot2 : occurences, ... }
-#         et renvoie le graphe associé (Pour l'instant on va déjà essayer de l'afficher mdr)
-#     """
-#     G = nx.Graph()
-#     # Liste des sommets
-#     nodes = list(set(dico.keys()))
-#     # Liste des aretes sous forme de tuple
-#     edges = []
-
-#     # G.add_nodes_from(nodes)
-
-#     previousWord = ""
-#     for word in dico:
-#         if not(previousWord == ""):
-#             print((previousWord, word))
-#             if (previousWord, word) not in edges:
-#                 # G.add_weighted_edge(previousWord,word,1)
-#                 edges.append((previousWord, word, 1))
-
-#         previousWord = word
-
-#     print(edges)
-
-#     G.add_weighted_edges_from(edges)
-
-#     pos = nx.spring_layout(G)
-#     nx.draw(G, pos, with_labels=True, font_weight='bold')
-#     edge_weight = nx.get_edge_attributes(G, 'weight')
-#     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_weight)
-#     plt.show()
-
-#     # plt.figure(figsize=(6, 6))
-
-#     # pos = nx.spring_layout(G)
-#     # nx.draw_networkx_nodes(G, pos)
-#     # nx.draw_networkx_labels(G, pos)
-
-#     # for edge in G.edges(data=True):
-#     #     nx.draw_networkx_edges(G, pos, edgelist=[(edge[0], edge[1])])
-
-#     # plt.show()
-
-
 def main():
     # string = "Salut mathieu comment ça va dis donc, parce ce que moi ça va super aujourd'hui mathieu"
     # graph_dict = script_parsing.parse_script(
@@ -136,7 +119,7 @@ def main():
     graph_dict = {"salut": {"bonjour": 2, "ok": 3, "prout": 3}, "bonjour": {
         "ok": 4}, "ok": {"prout": 2, "bonjour": 2}, "prout": {"ok": 5}}
     graph = Graph(graph_dict=graph_dict)
-    graph.show()
+    graph.show_in_window()
 
 
 if __name__ == "__main__":
