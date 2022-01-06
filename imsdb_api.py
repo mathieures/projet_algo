@@ -1,8 +1,6 @@
 from bs4 import BeautifulSoup, SoupStrainer
 import concurrent.futures
 import requests
-from Movie import PartialMovie
-from Script import Script
 
 
 # req2 = requests.get(lien)
@@ -42,9 +40,7 @@ def getName():
                 movie_title = movie_title[:-7]
             # movie_title = " ".join(movie_title.split(" ")[:-1])
 
-            script = Script(movie_url)
-
-            result[movie_title] = PartialMovie(title=movie_title, movie_url=movie_url, script=script)
+            result[movie_title] = movie_url
 
     # Récupération du nom des genres
     req = requests.get(SITE)
@@ -100,8 +96,7 @@ def getScript(movie_url):
 
             tag = soup.find(class_="scrtext")
             script = tag.pre
-
-            return PartialMovie(script=script)
+            return script
     return None
 
 

@@ -1,5 +1,5 @@
 import re
-# import imsdb_api
+import imsdb_api
 
 
 class Script:
@@ -29,44 +29,41 @@ class Script:
             self.parse()
         return self._parsed_script
 
-    @property
-    def script(self):
-        return self._script
-
-    @script.setter
-    def script(self, raw_script):
-        """Utiliser script = … pour définir l'attribut _script"""
-        # raw_script = imsdb_api.getScript(self._movie_url)
-        # On enlève le contenu des balises <b>, et
-        # toutes les autres balises sont supprimées
-        self._script = self._remove_tags(self._remove_b_tags(raw_script))
-
     def __init__(self, movie_url):
         self._movie_url = movie_url
-        self._script = None # str
+        self.script = None # str
         self._parsed_script = None # dict
 
-    # def download(self):
-    #     raw_script = imsdb_api.getScript(self._movie_url)
-    #     # On enlève le contenu des balises <b>, et
-    #     # toutes les autres balises sont supprimées
-    #     self._script = self._remove_tags(self._remove_b_tags(raw_script))
+    def download(self):
+        raw_script = str(imsdb_api.getScript(self._movie_url))
+        # On enlève le contenu des balises <b>, et
+        # toutes les autres balises sont supprimées
+        self.script = self._remove_tags(self._remove_b_tags(raw_script))
 
     def parse(self):
         """
         Transforme le script en un dictionnaire
         associant les mots et leurs occurrences
         """
-        if self._script is None:
+        if self.script is None:
             self.download()
         reg = re.compile("\w+")
         # Liste de tous les mots convertis en minuscules
         word_list = [reg.search(word)[0].lower() # [0] : tout ce qui a match
-                     for word in self._script.split()
+                     for word in self.script.split()
                      if reg.search(word) is not None]
 
         # Compte le nombre d'occurrences de chaque mot dans la liste
         self._parsed_script = {word: word_list.count(word) for word in word_list}
+        # # occurrences = {word: word_list.count(word) for word in word_list}
+
+        # # Associe chaque mot aux autres
+        # self._parsed_script = {}
+        # for word in occurrences:
+        #     copy_without_word = occurrences.copy()
+        #     copy_without_word.pop(word)
+        #     self._parsed_script[word] = copy_without_word
+        # # self._parsed_script = {word: occurrences.copy().pop(word) for word in occurrences}
 
 
 def main():
