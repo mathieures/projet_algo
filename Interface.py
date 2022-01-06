@@ -5,7 +5,6 @@ from Graph import Graph
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 
 
-
 class Interface:
     """Interface complète à instancier"""
 
@@ -66,7 +65,7 @@ class Panel(tk.Frame):
                                          command=self.destroy, width=2)
         self._destroy_button.pack()
 
-        self.graph = Graph.from_dict(graph_dict)
+        self.graph = Graph(graph_dict)
         self.plot_graph()
 
     def pack(self):
@@ -77,6 +76,7 @@ class Panel(tk.Frame):
 
     def plot_graph(self):
         # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
+        """
         print("Plot du graphe (plot_graph)")
         graph_fig = self.graph.fig
         self.graph.draw() # test
@@ -88,6 +88,8 @@ class Panel(tk.Frame):
         toolbar.pack(side=tk.BOTTOM)
         self._canvas.draw()
         print("Fin du plot")
+        """
+        pass
 
 
 
