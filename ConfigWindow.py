@@ -49,12 +49,12 @@ class ConfigWindow:
 
 
         # Entrees de texte
-        tk.Label(self._bottomframe, text="Number of movies:", width=15).pack(side=tk.LEFT)
+        tk.Label(self._bottomframe, text="Nombre de films :", width=15).pack(side=tk.LEFT)
         self._movie_nb_sb = tk.Spinbox(self._bottomframe, from_=1, to=2000, increment=1,
                                           width=18, textvariable=self._movie_nb)
         self._movie_nb_sb.pack(side=tk.RIGHT)
 
-        tk.Label(self._centerframe, text="Words per movie:", width=15).pack(side=tk.LEFT)
+        tk.Label(self._centerframe, text="Mots par film :", width=15).pack(side=tk.LEFT)
         self._word_nb_entry = tk.Entry(self._centerframe, textvariable=self._word_nb)
         self._word_nb_entry.pack(side=tk.RIGHT)
 
@@ -78,11 +78,11 @@ class ConfigWindow:
     def _ok(self, event=None):
         try:
             if self._movie_nb.get() > 0 and self._word_nb.get() > 0:
-                print("[Success] Starting interface")
+                print("[Succès] Lancement de l'interface")
 
                 self._root.destroy()
         except tk._tkinter.TclError:
-            print("[Error] Wrong movie number or word number")
+            print("[Erreur] Mauvais nombre de films ou de mots")
 
     def _on_return_key(self, event):
         self._ok_button.invoke()
