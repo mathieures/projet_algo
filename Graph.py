@@ -29,6 +29,7 @@ class Graph():
 
     @classmethod
     def from_nx_graph(cls, nx_graph):
+        """À noter qu'ici le graph_dict n'est pas initialisé"""
         g = cls()
         g._graph = nx_graph
         return g
@@ -40,49 +41,15 @@ class Graph():
             return OL
 
     def __init__(self):
-        """
-            Le graphe peut soit être généré grâce a un dict
-        """
-        # self._graph_dict = graph_dict
-        print(f"### Index: {Graph.INDEX}")
-        Graph.INDEX += 1
+        """Un graphe peut être généré grâce aux constructeurs alternatifs"""
 
         # On nomme la figure pour pouvoir la retrouver ensuite
         self.fig = plt.figure(num=f"Graph_{Graph.INDEX}")
-
-        # if self._graph_dict is not None:
-        #     self._graph = nx.Graph()
-        #     self._set_edges()
-        """
-        edges = [] # liste de tuples (src, dest, poids)
-        for word in graph_dict:
-            print(f"adding edge for: {word}")
-            for other_word in graph_dict[word]:
-                edges.append((word, other_word, graph_dict[word][other_word]))
-
-
-        fig, ax = plt.subplots()
-
-        print("avant graph")
-        g = ig.Graph.TupleList(edges, weights=True)
-        print("après graph")
-
-        print("avant layout")
-        layout = g.layout_lgl() # large graph layout
-        print("après layout")
-        print("avant plot")
-        ig.plot(g, layout=layout, target=ax, vertex_label=list(graph_dict))
-        print("après plot")
-
-        print("avant plt.show")
-        plt.show()
-        print("après plt.show")
-        """
+        Graph.INDEX += 1
 
     def _set_edges(self):
         """Affecte les arêtes au graphe"""
-        # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
-        # Un ensemble pour ne pas avoir de doublons
+        # Un dictionnaire pour ne pas avoir de doublons
         weights_dict = {}
         for word in self._graph_dict:
             for other_word in self._graph_dict[word]:
@@ -95,6 +62,7 @@ class Graph():
                 if edge not in weights_dict:
                     weights_dict[edge] = weight
 
+        # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
         edges = [(edge[0], edge[1], weights_dict[edge])
                  for edge in weights_dict]
         weights_dict.clear()
@@ -138,6 +106,16 @@ class Graph():
             self._graph, pos, edge_labels=edge_weight)
         print(f"{perf_counter() - t}\n")
         print("fin draw")
+
+    def get_sub_graph(self, node):
+        """
+        Prend en paramètre un sommet (str) et renvoie un sous-graphe
+        contenant seulement les sommets liés à celui-ci.
+        """
+        if node in self._graph_dict:
+            return Graph.from_dict({node: self._graph_dict[node]})
+        else:
+            return None
 
     def show_in_window(self):
         """Affiche le graphe"""

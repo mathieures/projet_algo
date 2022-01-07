@@ -20,7 +20,7 @@ class Interface:
         # Instanciation des éléments graphiques
         self._root = tk.Tk()
 
-        # Cadre du haut
+        # Cadre du bas
         self._bottom_frame = tk.Frame(self._root)
         self._bottom_frame.pack(side=tk.BOTTOM, anchor="se") # En bas à droite
 
@@ -56,9 +56,9 @@ class Interface:
 
 class Panel(tk.Frame):
     """Classe décrivant un "panneau", élément de l'interface."""
-    def __init__(self, parent_frame, **kwargs):
+    def __init__(self, parent, **kwargs):
         super().__init__(
-            parent_frame,
+            parent,
             padx=10, bd=5,
             **kwargs
         )
@@ -69,12 +69,12 @@ class Panel(tk.Frame):
 
 
 class InfoPanel(Panel):
-    def __init__(self, parent_frame, movies_infos):
-        super().__init__(parent_frame)
+    def __init__(self, parent, movies_infos):
+        super().__init__(parent)
 
         # Barre de défilement
-        self._scrollbar = tk.Scrollbar(self, orient="vertical")
-        self._scrollbar.pack(anchor="e", side=tk.RIGHT, fill=tk.Y)
+        # self._scrollbar = tk.Scrollbar(self, orient="vertical")
+        # self._scrollbar.pack(anchor="e", side=tk.RIGHT, fill=tk.Y)
         # TODO : trouver faire défiler une Frame
         # self.config(yscrollcommand=self._scrollbar.set)
         # self._scrollbar.config(command=self.yview)
@@ -94,27 +94,47 @@ class InfoPanel(Panel):
 
 class GraphPanel(Panel):
     """Panneau contenant un graphe."""
-    def __init__(self, parent_frame, graph_dict):
-        super().__init__(parent_frame, bg="#bbb")
+    def __init__(self, parent, graph_dict):
+        super().__init__(parent, bg="#bbb")
 
         # Cadre du haut
         self._top_frame = tk.Frame(self)
-        self._top_frame.pack(side=tk.TOP, anchor="ne")
+        self._top_frame.pack(side=tk.TOP, anchor="nw", fill=tk.X)
 
         # Bouton pour supprimer un GraphPanel
-        self._destroy_button = tk.Button(self._top_frame, text="-",
+        self._destroy_button = tk.Button(self._top_frame, text="x",
                                          command=self.destroy, width=2)
-        self._destroy_button.pack()
+        self._destroy_button.pack(side=tk.RIGHT)
+
+        # Zone de recherche
+        self._search_text = tk.StringVar()
+        self._search_text.set("Rechercher un mot")
+        self._search_entry = tk.Entry(self._top_frame, width=20, textvariable=self._search_text)
+        self._search_entry.pack(side=tk.LEFT)
+        self._search_button = tk.Button(self._top_frame, text="Ok", command=self._search_action)
+        self._search_button.pack(side="left")
+
+        self._canvas = None
+        self._toolbar = None
 
         self.graph = Graph.from_dict(graph_dict)
         self.plot_graph()
 
 
-    def plot_graph(self):
-        # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
+    def plot_graph(self, graph=None):
+        # Grâce à : https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
+        if graph is None:
+            graph = self.graph
+
+        # On enlève ce qui était présent
+        if self._canvas is not None:
+            self._canvas.get_tk_widget().destroy()
+            self._toolbar.destroy()
+            # self._toolbar.get_tk_widget().destroy()
+
         print("Plot du graphe (plot_graph)")
-        graph_fig = self.graph.fig
-        self.graph.draw()
+        graph_fig = graph.fig
+        graph.draw()
         # Graph.INDEX += 1
         self._canvas = FigureCanvasTkAgg(graph_fig, master=self)
         # tk.Canvas(self, width=150, height=150, bg="red")
@@ -124,6 +144,28 @@ class GraphPanel(Panel):
         self._toolbar.pack(side=tk.BOTTOM)
         self._canvas.draw()
         print("Fin du plot")
+
+    def _search_action(self):
+        node = self._search_text.get()
+        # Si l'input n'est pas nul
+        if node != "":
+            sub_graph = self.graph.get_sub_graph(node)
+            if sub_graph is not None:
+                self.clear()
+                self.plot_graph(sub_graph)
+            else:
+                self._search_text.set("Mot introuvable")
+        # Sinon on affiche tout
+        else:
+            self.clear()
+            self.plot_graph()
+
+    def clear(self):
+        # self._canvas.get_tk_widget().delete("all")
+        for item in self._canvas.get_tk_widget().find_all():
+            self._canvas.get_tk_widget().delete(item)
+
+
 
 
 def main():

@@ -42,7 +42,7 @@ class ConfigWindow:
 
         # Variables
         self._movie_nb = tk.IntVar()
-        self._movie_nb.set(1)
+        self._movie_nb.set(2)
 
         self._word_nb = tk.IntVar()
         self._word_nb.set(50)
