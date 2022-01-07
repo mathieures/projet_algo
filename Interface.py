@@ -164,6 +164,8 @@ class GraphPanel(Panel):
         self._toolbar = None
 
         self.graph = Graph.from_dict(graph_dict)
+        # self._sub_graph va garder en memoire le sous graphe d'une recherche de mot
+        self._sub_graph = None
         self.plot_graph()
 
     def plot_graph(self, graph=None):
@@ -205,6 +207,7 @@ class GraphPanel(Panel):
         # Sinon on affiche tout
         else:
             self.plot_graph()
+            self._sub_graph = None
 
     def _filter_action(self):
         weight = self._filter_text.get()
