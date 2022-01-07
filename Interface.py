@@ -106,7 +106,7 @@ class GraphPanel(Panel):
                                          command=self.destroy, width=2)
         self._destroy_button.pack()
 
-        self.graph = Graph(graph_dict)
+        self.graph = Graph.from_dict(graph_dict)
         self.plot_graph()
 
 
@@ -115,7 +115,7 @@ class GraphPanel(Panel):
         print("Plot du graphe (plot_graph)")
         graph_fig = self.graph.fig
         self.graph.draw()
-        Graph.INDEX += 1
+        # Graph.INDEX += 1
         self._canvas = FigureCanvasTkAgg(graph_fig, master=self)
         # tk.Canvas(self, width=150, height=150, bg="red")
         self._canvas.get_tk_widget().pack(side=tk.BOTTOM)

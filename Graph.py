@@ -19,19 +19,38 @@ class Graph():
     def edges(self):
         return self._graph.edges()
 
-    def __init__(self, graph_dict=None):
+    @classmethod
+    def from_dict(cls, graph_dict):
+        g = cls()
+        g._graph = nx.Graph()
+        g._graph_dict = graph_dict
+        g._set_edges()
+        return g
+
+    @classmethod
+    def from_nx_graph(cls, nx_graph):
+        g = cls()
+        g._graph = nx_graph
+        return g
+
+    @classmethod
+    def from_pickle(cls, filename):
+        raise NotImplementedError
+
+    def __init__(self):
         """
             Le graphe peut soit être généré grâce a un dict
         """
-        self._graph_dict = graph_dict
-        print(f"### Index: {self.INDEX}")
+        # self._graph_dict = graph_dict
+        print(f"### Index: {Graph.INDEX}")
+        Graph.INDEX += 1
 
         # On nomme la figure pour pouvoir la retrouver ensuite
-        self.fig = plt.figure(num=f"Graph_{self.INDEX}")
+        self.fig = plt.figure(num=f"Graph_{Graph.INDEX}")
 
-        if self._graph_dict is not None:
-            self._graph = nx.Graph()
-            self._set_edges()
+        # if self._graph_dict is not None:
+        #     self._graph = nx.Graph()
+        #     self._set_edges()
         """
         edges = [] # liste de tuples (src, dest, poids)
         for word in graph_dict:
@@ -131,7 +150,7 @@ class Graph():
         try:
             self._graph = nx.read_gpickle(path)
         except:
-            print("Le chemin du fichier est faux")
+            print("[Errur] Le chemin du fichier est invalide")
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
     #
@@ -153,11 +172,7 @@ class Graph():
 
 
 def main():
-    # string = "Salut mathieu comment ça va dis donc, parce ce que moi ça va super aujourd'hui mathieu"
-    # graph_dict = script_parsing.parse_script(
-    #     script_parsing._remove_tags(script_parsing._remove_b_tags(string)))
-    # On se repose sur le fait que les dict sauvegardent l'ordre d'insertion depuis 3.7
-    # graph_from_dict(graph_dict)
+    # On se repose sur le fait que les dict sauvegardent l'ordre d'insertion depuis Python 3.7
     graph_dict = {
         "salut": {"bonjour": 2, "ok": 3, "prout": 3},
         "bonjour": {"ok": 4},
