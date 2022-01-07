@@ -23,10 +23,10 @@ class ConfigWindow:
 
     def __init__(self):
         self._root = tk.Tk()
-        self._root.title("Config window")
+        self._root.title("Configuration")
 
         # Frames
-        self._labelframe = tk.LabelFrame(self._root, text="Configure the graphs to create")
+        self._labelframe = tk.LabelFrame(self._root, text="Configurez les graphes créés")
         self._labelframe.pack(padx=10, ipadx=10)
 
         self._buttonframe = tk.Frame(self._root)

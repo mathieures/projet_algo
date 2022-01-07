@@ -82,29 +82,28 @@ class Graph():
 
     def draw(self):
         """Charge la figure en mémoire"""
-        print("début draw")
-        print("spring_layout : ", end="")
+        print("Temps de calcul des étapes d'affichage du graphe :")
+        print("Détermination de la disposition : ", end="")
         t = perf_counter()
         pos = nx.spring_layout(self._graph)
         print(f"{perf_counter() - t}\n")
 
-        print("nx.draw : ", end="")
+        print("Chargement des sommets et arêtes : ", end="")
         t = perf_counter()
         nx.draw(self._graph, pos, with_labels=True,
                 font_weight='bold', font_size=8)
         print(f"{perf_counter() - t}\n")
 
-        print("nx.get_edge_attr : ", end="")
+        print("Affectation des poids : ", end="")
         t = perf_counter()
         edge_weight = nx.get_edge_attributes(self._graph, 'weight')
         print(f"{perf_counter() - t}\n")
 
-        print("nx.draw_networkx_edge_labels : ", end="")
+        print("Affichage des poids : ", end="")
         t = perf_counter()
         nx.draw_networkx_edge_labels(
             self._graph, pos, edge_labels=edge_weight)
         print(f"{perf_counter() - t}\n")
-        print("fin draw")
 
     def get_sub_graph(self, node):
         """
@@ -117,12 +116,10 @@ class Graph():
             return None
 
     def show_in_window(self):
-        """Affiche le graphe"""
-        print("début show_in_window")
+        """Affiche le graphe dans une fenêtre séparée, gérée par matplotlib"""
         if self._graph is not None:
             self.draw()
             plt.show()
-        print("fin show_in_window")
 
     # def save_as_png(self, filename):
     #     """

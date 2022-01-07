@@ -104,8 +104,6 @@ def main():
     except KeyboardInterrupt:
         pass
 
-    # print("final :", GRAPH_DICT)
-
     nb_panels = 1
     interface = Interface(nb_panels, MOVIES_INFOS, GRAPH_DICT)  # bloquant
 

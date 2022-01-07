@@ -125,8 +125,8 @@ class GraphPanel(Panel):
         self._file_menu.pack(side=tk.LEFT)
 
         # Bouton pour supprimer un GraphPanel
-        self._destroy_button = tk.Button(self._menu_frame, text="x",
-                                         command=self.destroy, width=2)
+        self._destroy_button = tk.Button(self._menu_frame, text="Fermer le panneau",
+                                         command=self.destroy)
         self._destroy_button.pack(side="left")
 
         # Zone de filtre (à droite)

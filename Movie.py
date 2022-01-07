@@ -9,15 +9,6 @@ class PartialMovie:
     pas encore récolté toutes les informations
     """
 
-    # @staticmethod
-    # def _get_genres_from_dict(dict_):
-    #     """
-    #     Retourne une liste des genres sous forme de str, car
-    #     l'API ne nous les fournit pas sous une forme exploitable
-    #     """
-    #     # TODO : à supprimer une fois que les genres seront récupérés sur le site des scripts
-    #     return [genre["name"] for genre in dict_["genres"]]
-
     @classmethod
     def from_dict(cls, dict_):
         """
@@ -36,23 +27,6 @@ class PartialMovie:
             script=dict_.get("script"),
             movie_url=dict_.get("movie_url")
         ) if dict_ is not None else None
-
-    # @property
-    # def script(self):
-    #     """
-    #     Retourne le script s'il est défini, le
-    #     télécharge si non et si un lien est défini
-    #     """
-    #     if self._script is None and self.movie_url is not None:
-    #         self._script = imsdb_api.getScript(self.movie_url)
-    #     return self._script
-
-    # @property
-    # def genres(self):
-    #     """
-    #     Retourne les genres du films s'ils sont définis, les récupère si non
-    #     """
-    #     return self._genres
 
     def __init__(self,
                  budget=None,
@@ -80,12 +54,16 @@ class PartialMovie:
         return f"<{type(self).__name__}: {string}>"
 
     def __str__(self):
-        return f"{self.title}"
+        """
+        Utilisé par tkinter pour l'affichage. On sait que cela n'arrive
+        qu'à un seul moment, donc on peut lui donner un sens.
+        """
+        return "[Informations indisponibles]"
 
 
 class Movie(PartialMovie):
     """
-    Classe pour un résultat après l'appel aux APIs,
+    Classe pour un résultat après l'appel aux API's,
     qui contient toutes les informations utiles après
     le traitement du script.
     """
