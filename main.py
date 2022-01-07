@@ -43,7 +43,9 @@ def main():
 
 
     picked_movies = pick_movies(data, movie_nb)
-    print(f"Films choisis : {picked_movies}")
+    if not isinstance(picked_movies, list):
+        picked_movies = [picked_movies]
+    print(f"Films choisis : {', '.join(picked_movies)}")
 
     try:
         for movie_title in picked_movies:
