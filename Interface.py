@@ -19,6 +19,7 @@ class Interface:
 
         # Instanciation des éléments graphiques
         self._root = tk.Tk()
+        self._root.title("bg ma gueule")
 
         # Cadre du bas
         self._bottom_frame = tk.Frame(self._root)
@@ -114,6 +115,9 @@ class GraphPanel(Panel):
         self._search_button = tk.Button(self._top_frame, text="Ok", command=self._search_action)
         self._search_button.pack(side="left")
 
+        self._search_entry.bind("<Button-1>", self._clear_search_entry)
+
+        # Canvas
         self._canvas = None
         self._toolbar = None
 
@@ -135,7 +139,6 @@ class GraphPanel(Panel):
         print("Plot du graphe (plot_graph)")
         graph_fig = graph.fig
         graph.draw()
-        # Graph.INDEX += 1
         self._canvas = FigureCanvasTkAgg(graph_fig, master=self)
         # tk.Canvas(self, width=150, height=150, bg="red")
         self._canvas.get_tk_widget().pack(side=tk.BOTTOM)
@@ -151,21 +154,20 @@ class GraphPanel(Panel):
         if node != "":
             sub_graph = self.graph.get_sub_graph(node)
             if sub_graph is not None:
-                self.clear()
                 self.plot_graph(sub_graph)
             else:
                 self._search_text.set("Mot introuvable")
         # Sinon on affiche tout
         else:
-            self.clear()
             self.plot_graph()
 
-    def clear(self):
-        # self._canvas.get_tk_widget().delete("all")
-        for item in self._canvas.get_tk_widget().find_all():
-            self._canvas.get_tk_widget().delete(item)
-
-
+    def _clear_search_entry(self, evt):
+        """
+        Efface le contenu de la case s'il y a plusieurs mots (permet
+        d'efface "Rechercher un mot" et "Mot introuvable" entre autres)
+        """
+        if len(self._search_text.get().split()) > 1:
+            self._search_text.set("")
 
 
 def main():
