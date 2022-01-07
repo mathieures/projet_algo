@@ -121,22 +121,24 @@ class GraphPanel(Panel):
         self._search_entry.bind("<Button-1>", self._clear_search_entry)
 
         # Zone de filtre
-        self._filtre_text = tk.StringVar()
-        self._filtre_text.set("Filtrer par poids")
-        self._filtre_entry = tk.Entry(
-            self._top_frame, width=20, textvariable=self._filtre_text)
-        self._filtre_entry.pack(side=tk.LEFT)
+        self._filter_text = tk.StringVar()
+        self._filter_text.set("Filtrer par poids")
+        self._filter_entry = tk.Entry(
+            self._top_frame, width=20, textvariable=self._filter_text)
+        self._filter_entry.pack(side=tk.LEFT)
         self._filtre_button = tk.Button(
-            self._top_frame, text="Ok", command=self._filtre_action)
+            self._top_frame, text="Ok", command=self._filter_action)
         self._filtre_button.pack(side="left")
 
-        self._filtre_entry.bind("<Button-1>", self._clear_filtre_entry)
+        self._filter_entry.bind("<Button-1>", self._clear_filter_entry)
 
         # Canvas
         self._canvas = None
         self._toolbar = None
 
         self.graph = Graph.from_dict(graph_dict)
+        # self._sub_graph va garder en memoire le sous graphe d'une recherche de mot
+        self._sub_graph = None
         self.plot_graph()
 
     def plot_graph(self, graph=None):
@@ -162,13 +164,17 @@ class GraphPanel(Panel):
         self._canvas.draw()
         print("Fin du plot")
 
-    def _filtre_action(self):
-        weight = self._filtre_text.get()
+    def _filter_action(self):
+        weight = self._filter_text.get()
         # Si l'input n'est pas nul
         if weight != "":
             if weight.isnumeric():
-                sub_graph = self.graph.weight_filter(int(weight))
-                if sub_graph is not None:
+                # On regarde si une recherche de mot a été effectué et si c'est le cas, on applique le filtre dessus
+                if self._sub_graph is not None:
+                    sub_graph = self._sub_graph.weight_filter(int(weight))
+                else:
+                    sub_graph = self.graph.weight_filter(int(weight))
+                if self._sub_graph is not None:
                     self.plot_graph(sub_graph)
                 else:
                     self._filtre_text.set("Poids introuvable")
@@ -182,14 +188,15 @@ class GraphPanel(Panel):
         node = self._search_text.get()
         # Si l'input n'est pas nul
         if node != "":
-            sub_graph = self.graph.get_sub_graph(node)
-            if sub_graph is not None:
-                self.plot_graph(sub_graph)
+            self._sub_graph = self.graph.get_sub_graph(node)
+            if self._sub_graph is not None:
+                self.plot_graph(self._sub_graph)
             else:
                 self._search_text.set("Mot introuvable")
         # Sinon on affiche tout
         else:
             self.plot_graph()
+            self._sub_graph = None
 
     def _clear_search_entry(self, evt):
         """
@@ -199,13 +206,13 @@ class GraphPanel(Panel):
         if len(self._search_text.get().split()) > 1:
             self._search_text.set("")
 
-    def _clear_filtre_entry(self, evt):
+    def _clear_filter_entry(self, evt):
         """
         Efface le contenu de la case s'il y a plusieurs mots (permet
         d'efface "Filtrer un poids" et "Ce n'est pas un nombre" entre autres)
         """
-        if len(self._filtre_text.get().split()) > 1:
-            self._filtre_text.set("")
+        if len(self._filter_text.get().split()) > 1:
+            self._filter_text.set("")
 
 
 def main():
