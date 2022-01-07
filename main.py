@@ -5,7 +5,6 @@ from Interface import Interface
 from Movie import PartialMovie, Movie
 from Script import Script
 
-import concurrent.futures
 import os
 from random import choices as rand_choices
 
