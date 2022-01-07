@@ -56,7 +56,7 @@ class Interface:
         """Enlève et détruit proprement un GraphPanel"""
         if graph_panel in self._graph_panels:
             graph_panel.destroy()
-            self._search_text.remove(graph_panel)
+            self._graph_panels.remove(graph_panel)
             self.resize_GraphPanels()
 
     def resize_GraphPanels(self):
@@ -67,9 +67,12 @@ class Interface:
             info_panel_width = self._info_panel.winfo_width()
             new_width = (window_width - info_panel_width) // len(self._graph_panels)
             graph_panel.canvas.get_tk_widget().config(width=new_width)
-            # graph_panel.canvas.get_tk_widget().config(height=self._root.winfo_height())
             graph_panel.toolbar.config(width=new_width)
-            # graph_panel.toolbar.config(height=self._root.winfo_height())
+
+            # Ne fonctionne pas bien
+            # new_height = self._root.winfo_height() // 1.2
+            # graph_panel.canvas.get_tk_widget().config(height=new_height)
+            # graph_panel.toolbar.config(height=new_height)
 
 
     def _quit_interface(self):
