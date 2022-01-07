@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import write_dot, read_dot
 import networkx as nx
 import igraph as ig
+import pickle
 
 # https://networkx.org/documentation/stable/reference/classes/multigraph.html
 
@@ -16,17 +17,17 @@ class Graph():
 
     @property
     def edges(self):
-        return self._graph.edges()  
+        return self._graph.edges()
 
     def __init__(self, graph_dict=None):
         """
             Le graphe peut soit être généré grâce a un dict
         """
         self._graph_dict = graph_dict
+        print(f"### Index: {self.INDEX}")
 
         # On nomme la figure pour pouvoir la retrouver ensuite
-        self.fig = plt.figure(f"Graph_{self.INDEX}")
-        self.INDEX += 1
+        self.fig = plt.figure(num=f"Graph_{self.INDEX}")
 
         if self._graph_dict is not None:
             self._graph = nx.Graph()
@@ -57,7 +58,6 @@ class Graph():
         print("après plt.show")
         """
 
-
     def _set_edges(self):
         """Affecte les arêtes au graphe"""
         # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
@@ -65,7 +65,7 @@ class Graph():
         weights_dict = {}
         for word in self._graph_dict:
             for other_word in self._graph_dict[word]:
-                edge = [word, other_word] # src, dest
+                edge = [word, other_word]  # src, dest
                 weight = self._graph_dict[word][other_word]
                 # On trie la source et la destination par ordre croissant
                 if edge[0] > edge[1]:
@@ -74,31 +74,36 @@ class Graph():
                 if edge not in weights_dict:
                     weights_dict[edge] = weight
 
-        edges = [(edge[0], edge[1], weights_dict[edge]) for edge in weights_dict]
+        edges = [(edge[0], edge[1], weights_dict[edge])
+                 for edge in weights_dict]
         weights_dict.clear()
-        
+
         # Les sommets sont créés automatiquement
         self._graph.add_weighted_edges_from(edges)
-
 
     def draw(self):
         """Charge la figure en mémoire"""
         # pour le debug
         from time import perf_counter
         print("début draw")
-        print("spring_layout : ", end="") ; t = perf_counter()
+        print("spring_layout : ", end="")
+        t = perf_counter()
         pos = nx.spring_layout(self._graph)
         print(f"{perf_counter() - t}\n")
 
-        print("nx.draw : ", end="") ; t = perf_counter()
-        nx.draw(self._graph, pos, with_labels=True, font_weight='bold')
+        print("nx.draw : ", end="")
+        t = perf_counter()
+        nx.draw(self._graph, pos, with_labels=True,
+                font_weight='bold', font_size=8)
         print(f"{perf_counter() - t}\n")
 
-        print("nx.get_edge_attr : ", end="") ; t = perf_counter()
+        print("nx.get_edge_attr : ", end="")
+        t = perf_counter()
         edge_weight = nx.get_edge_attributes(self._graph, 'weight')
         print(f"{perf_counter() - t}\n")
 
-        print("nx.draw_networkx_edge_labels : ", end="") ; t = perf_counter()
+        print("nx.draw_networkx_edge_labels : ", end="")
+        t = perf_counter()
         nx.draw_networkx_edge_labels(
             self._graph, pos, edge_labels=edge_weight)
         print(f"{perf_counter() - t}\n")
@@ -117,6 +122,16 @@ class Graph():
         if self._graph is not None:
             self.draw()
             plt.savefig("graph.png")
+
+    def save_as_pickle(self):
+        if self._graph is not None:
+            nx.write_gpickle(self._graph, "graph.gpickle")
+
+    def import_from_pickle(self, path):
+        try:
+            self._graph = nx.read_gpickle(path)
+        except:
+            print("Le chemin du fichier est faux")
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
     #
@@ -158,7 +173,7 @@ def main():
 
     g = ig.Graph(len(graph_dict))
 
-    g.vs["word"] = list(graph_dict) # liste des mots
+    g.vs["word"] = list(graph_dict)  # liste des mots
     g.vs["label"] = g.vs["word"]
 
     # g.es["weight"] = # liste des poids ?
@@ -168,7 +183,7 @@ def main():
     weights_dict = {}
     for word in graph_dict:
         for other_word in graph_dict[word]:
-            edge = [word, other_word] # src, dest
+            edge = [word, other_word]  # src, dest
             weight = graph_dict[word][other_word]
             # On trie la source et la destination par ordre croissant
             if edge[0] > edge[1]:
@@ -185,13 +200,23 @@ def main():
     for e in g.es:
         print(e)
 
-    layout = g.layout_lgl() # large graph layout
+    layout = g.layout_lgl()  # large graph layout
     ig.plot(g, layout=layout, target=ax, vertex_label=list(graph_dict))
 
     plt.show()
     # """
 
+def test():
+    GRAPH_DICT = {
+        "salut": {"bonjour": 2, "ok": 3, "prout": 3},
+        "bonjour": {"ok": 4},
+        "ok": {"prout": 2, "bonjour": 2},
+        "prout": {"ok": 5}
+    }
 
+    g = Graph(GRAPH_DICT)
+    g.save_as_pickle()
 
 if __name__ == "__main__":
-    main()
+    # main()
+    test()
