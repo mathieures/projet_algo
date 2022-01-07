@@ -47,14 +47,14 @@ class Script:
         """
         if self.script is None:
             self.download()
-        reg = re.compile("\w+")
+        reg = re.compile("\D+") # non-digit
         # Liste de tous les mots convertis en minuscules
         word_list = [reg.search(word)[0].lower() # [0] : tout ce qui a match
                      for word in self.script.split()
                      if reg.search(word) is not None]
 
         # Compte le nombre d'occurrences de chaque mot dans la liste
-        self._parsed_script = {word: word_list.count(word) for word in word_list}
+        self._parsed_script = {word: word_list.count(word) for word in word_list if len(word) > 1}
         # # occurrences = {word: word_list.count(word) for word in word_list}
 
         # # Associe chaque mot aux autres

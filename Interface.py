@@ -76,10 +76,9 @@ class Panel(tk.Frame):
 
     def plot_graph(self):
         # https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
-        """
         print("Plot du graphe (plot_graph)")
         graph_fig = self.graph.fig
-        self.graph.draw() # test
+        self.graph.draw()
         self._canvas = FigureCanvasTkAgg(graph_fig, master=self)
         # tk.Canvas(self, width=150, height=150, bg="red")
         self._canvas.get_tk_widget().pack(side=tk.BOTTOM)
@@ -88,8 +87,6 @@ class Panel(tk.Frame):
         toolbar.pack(side=tk.BOTTOM)
         self._canvas.draw()
         print("Fin du plot")
-        """
-        pass
 
 
 

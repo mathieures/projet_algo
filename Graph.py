@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-# from networkx.drawing.nx_pydot import write_dot, read_dot
-# import networkx as nx
+from networkx.drawing.nx_pydot import write_dot, read_dot
+import networkx as nx
 import igraph as ig
 
 # https://networkx.org/documentation/stable/reference/classes/multigraph.html
@@ -24,7 +24,6 @@ class Graph():
         """
         self._graph_dict = graph_dict
 
-        """
         # On nomme la figure pour pouvoir la retrouver ensuite
         self.fig = plt.figure(f"Graph_{self.INDEX}")
         self.INDEX += 1
@@ -56,20 +55,28 @@ class Graph():
         print("avant plt.show")
         plt.show()
         print("après plt.show")
+        """
 
 
     def _set_edges(self):
         """Affecte les arêtes au graphe"""
         # Une liste de tuple de la forme [(sommet1, sommet2, poids) , (...), ...]
-        edges = []
+        # Un ensemble pour ne pas avoir de doublons
+        weights_dict = {}
         for word in self._graph_dict:
             for other_word in self._graph_dict[word]:
-                edges.append((word, other_word, self._graph_dict[word][other_word]))
+                edge = [word, other_word] # src, dest
+                weight = self._graph_dict[word][other_word]
+                # On trie la source et la destination par ordre croissant
+                if edge[0] > edge[1]:
+                    edge[0], edge[1] = edge[1], edge[0]
+                edge = tuple(edge)
+                if edge not in weights_dict:
+                    weights_dict[edge] = weight
 
-            # Pour libérer de la mémoire
-            # del self._graph_dict[word]
-
-        # return (nodes, edges)
+        edges = [(edge[0], edge[1], weights_dict[edge]) for edge in weights_dict]
+        weights_dict.clear()
+        
         # Les sommets sont créés automatiquement
         self._graph.add_weighted_edges_from(edges)
 
@@ -142,29 +149,36 @@ def main():
         "ok": {"prout": 2, "bonjour": 2},
         "prout": {"ok": 5}
     }
-    """
     graph = Graph(graph_dict)
     graph.show_in_window()
-    """
 
+    # """
     # Test d'igraph
     fig, ax = plt.subplots()
 
-    """
     g = ig.Graph(len(graph_dict))
 
     g.vs["word"] = list(graph_dict) # liste des mots
     g.vs["label"] = g.vs["word"]
 
     # g.es["weight"] = # liste des poids ?
-    """
 
     # g = ig.Graph(len(graph_dict))
 
-    edges = [] # liste de tuples (src, dest, poids)
+    weights_dict = {}
     for word in graph_dict:
         for other_word in graph_dict[word]:
-            edges.append((word, other_word, float(graph_dict[word][other_word])))
+            edge = [word, other_word] # src, dest
+            weight = graph_dict[word][other_word]
+            # On trie la source et la destination par ordre croissant
+            if edge[0] > edge[1]:
+                edge[0], edge[1] = edge[1], edge[0]
+            edge = tuple(edge)
+            if edge not in weights_dict:
+                weights_dict[edge] = weight
+
+    edges = [(edge[0], edge[1], weights_dict[edge]) for edge in weights_dict]
+    weights_dict.clear()
 
     g = ig.Graph.TupleList(edges, weights=True)
 
@@ -175,6 +189,7 @@ def main():
     ig.plot(g, layout=layout, target=ax, vertex_label=list(graph_dict))
 
     plt.show()
+    # """
 
 
 

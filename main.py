@@ -19,6 +19,20 @@ def main():
     data = imsdb_api.getName()
     # Associe les noms de film à l'url de leur page IMSDB.
 
+
+    GRAPH_DICT = {
+        "salut": {"bonjour": 2, "ok": 3, "prout": 3},
+        "bonjour": {"ok": 4},
+        "ok": {"prout": 2, "bonjour": 2},
+        "prout": {"ok": 5}
+    }
+
+    nb_panels = 1
+    interface = Interface(nb_panels, GRAPH_DICT)  # bloquant
+
+    return
+
+
     try:
         for movie_title in data:
             print(f"Film : {movie_title}")
@@ -39,7 +53,7 @@ def main():
             script.parse() # Facultatif
             for word in script.parsed_script:
                 copy_without_word = script.parsed_script.copy()
-                copy_without_word.pop(word)
+                del copy_without_word[word]
                 # Si le mot de base n'est pas présent dans le dictionnaire,
                 # Alors il n'y a pas encore d'occurrences
                 if word not in GRAPH_DICT:
@@ -55,6 +69,10 @@ def main():
                         GRAPH_DICT[word][other_word] += copy_without_word[other_word]
 
             # A SUPPRIMER
+            keys = list(GRAPH_DICT)
+            print("nb mots :", len(keys))
+            for i in range(int(0.95 * len(keys))):
+                del GRAPH_DICT[keys[i]] # test pour voir si quand on supprime des clés c'est plus rapide
             print("Fin du traitement du script")
             break
 
