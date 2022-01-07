@@ -142,7 +142,7 @@ class Graph():
     # @staticmethod
     # def import_graph(path):
     #     graph = read_dot(path)
-    #     return Graph(graph=graph)
+    #     return Graph.from_nx_graph(graph)
     #
     # def save_as_dot(self):
     #     """
