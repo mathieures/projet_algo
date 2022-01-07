@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import write_dot, read_dot
 import networkx as nx
-import igraph as ig
 import pickle
 from time import perf_counter
 
@@ -86,24 +85,24 @@ class Graph():
         print("Détermination de la disposition : ", end="")
         t = perf_counter()
         pos = nx.spring_layout(self._graph)
-        print(f"{perf_counter() - t}\n")
+        print(f"{perf_counter() - t:.4f}s\n")
 
         print("Chargement des sommets et arêtes : ", end="")
         t = perf_counter()
         nx.draw(self._graph, pos, with_labels=True,
                 font_weight='bold', font_size=8)
-        print(f"{perf_counter() - t}\n")
+        print(f"{perf_counter() - t:.4f}s\n")
 
         print("Affectation des poids : ", end="")
         t = perf_counter()
         edge_weight = nx.get_edge_attributes(self._graph, 'weight')
-        print(f"{perf_counter() - t}\n")
+        print(f"{perf_counter() - t:.4f}s\n")
 
         print("Affichage des poids : ", end="")
         t = perf_counter()
         nx.draw_networkx_edge_labels(
             self._graph, pos, edge_labels=edge_weight)
-        print(f"{perf_counter() - t}\n")
+        print(f"{perf_counter() - t:.4f}s\n")
 
     def get_sub_graph(self, node):
         """
