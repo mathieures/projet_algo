@@ -35,7 +35,9 @@ class Graph():
 
     @classmethod
     def from_pickle(cls, filename):
-        raise NotImplementedError
+        with open(filename, 'rb') as f1:
+            OL = pickle.load(f1)
+            return OL
 
     def __init__(self):
         """
@@ -100,6 +102,15 @@ class Graph():
         # Les sommets sont créés automatiquement
         self._graph.add_weighted_edges_from(edges)
 
+    def weight_filter(self, weight):
+        new_edges = []
+        for u, v, w in self._graph.edges(data=True):
+            if w["weight"] >= weight:
+                new_edges.append((u,v,w["weight"]))
+        G = nx.Graph()
+        G.add_weighted_edges_from(new_edges)
+        return Graph.from_nx_graph(G)
+
     def draw(self):
         """Charge la figure en mémoire"""
         # pour le debug
@@ -144,13 +155,9 @@ class Graph():
 
     def save_as_pickle(self):
         if self._graph is not None:
-            nx.write_gpickle(self._graph, "graph.gpickle")
+            with open('graph.pickle', 'wb') as f1:
+                pickle.dump(self, f1)
 
-    def import_from_pickle(self, path):
-        try:
-            self._graph = nx.read_gpickle(path)
-        except:
-            print("[Errur] Le chemin du fichier est invalide")
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
     #
@@ -229,8 +236,14 @@ def test():
         "prout": {"ok": 5}
     }
 
-    g = Graph(GRAPH_DICT)
-    g.save_as_pickle()
+    g = Graph.from_dict(GRAPH_DICT)
+    # g.save_as_pickle()
+    # G = Graph.from_pickle("graph.pickle")
+    # print(type(g))
+    # print(type(G))
+
+    print(g.edges)
+    print(g.weight_filter(3).edges)
 
 if __name__ == "__main__":
     # main()
