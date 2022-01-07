@@ -2,6 +2,7 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 from Graph import Graph
 
+from tkinter import filedialog, messagebox
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 
@@ -19,7 +20,7 @@ class Interface:
 
         # Instanciation des éléments graphiques
         self._root = tk.Tk()
-        self._root.title("bg ma gueule")
+        self._root.title("Visualisation de graphe")
 
         # Cadre du bas
         self._bottom_frame = tk.Frame(self._root)
@@ -39,6 +40,7 @@ class Interface:
         for _ in range(nb_graph_panels):
             self.add_panel()
 
+
         # Pour gerer la fermeture de la fenetre
         self._root.protocol("WM_DELETE_WINDOW", self._quit_interface)
 
@@ -49,6 +51,7 @@ class Interface:
         new_panel = GraphPanel(self._root, self._graph_dict)
         self._graph_panels.append(new_panel)
         new_panel.pack()
+
 
     def _quit_interface(self):
         exit(1)
@@ -103,34 +106,58 @@ class GraphPanel(Panel):
         self._top_frame = tk.Frame(self)
         self._top_frame.pack(side=tk.TOP, anchor="nw", fill=tk.X)
 
-        # Bouton pour supprimer un GraphPanel
-        self._destroy_button = tk.Button(self._top_frame, text="x",
-                                         command=self.destroy, width=2)
-        self._destroy_button.pack(side=tk.RIGHT)
+        # Menu "Fichier"
+        self._menu_frame = tk.Frame(self._top_frame)
+        self._menu_frame.pack(anchor="w", side=tk.LEFT, expand=True, fill=tk.X)
 
-        # Zone de recherche
+        self._file_menu = tk.Menubutton(
+            self._menu_frame,
+            text="Fichier",
+            relief="raised")
+
+        self._file_sub_menu = tk.Menu(self._file_menu, tearoff=False)
+        self._file_sub_menu.add_command(label="Importer (pickle)",
+                                        command=self._import_graph_from_pickle)
+        self._file_sub_menu.add_command(label="Exporter (pickle)",
+                                        command=self._export_graph_to_pickle)
+
+        self._file_menu.config(menu=self._file_sub_menu)
+        self._file_menu.pack(side=tk.LEFT)
+
+        # Bouton pour supprimer un GraphPanel
+        self._destroy_button = tk.Button(self._menu_frame, text="x",
+                                         command=self.destroy, width=2)
+        self._destroy_button.pack(side="left")
+
+        # Zone de filtre (à droite)
+        self._filter_frame = tk.Frame(self._menu_frame)
+        self._filter_frame.pack(side="right")
+
+        self._filter_text = tk.StringVar()
+        self._filter_text.set("Filtrer par poids")
+        self._filter_entry = tk.Entry(
+            self._filter_frame, width=20, textvariable=self._filter_text)
+        self._filter_entry.pack(side="top")
+        self._filter_button = tk.Button(
+            self._filter_frame, text="Ok", command=self._filter_action)
+        self._filter_button.pack(expand=True, fill="x")
+
+        self._filter_entry.bind("<Button-1>", self._clear_filter_entry)
+
+        # Zone de recherche (à gauche)
+        self._search_frame = tk.Frame(self._menu_frame)
+        self._search_frame.pack(side="right")
+
         self._search_text = tk.StringVar()
         self._search_text.set("Rechercher un mot")
         self._search_entry = tk.Entry(
-            self._top_frame, width=20, textvariable=self._search_text)
-        self._search_entry.pack(side=tk.LEFT)
+            self._search_frame, width=20, textvariable=self._search_text)
+        self._search_entry.pack(side="top")
         self._search_button = tk.Button(
-            self._top_frame, text="Ok", command=self._search_action)
-        self._search_button.pack(side="left")
+            self._search_frame, text="Ok", command=self._search_action)
+        self._search_button.pack(expand=True, fill="x")
 
         self._search_entry.bind("<Button-1>", self._clear_search_entry)
-
-        # Zone de filtre
-        self._filtre_text = tk.StringVar()
-        self._filtre_text.set("Filtrer par poids")
-        self._filtre_entry = tk.Entry(
-            self._top_frame, width=20, textvariable=self._filtre_text)
-        self._filtre_entry.pack(side=tk.LEFT)
-        self._filtre_button = tk.Button(
-            self._top_frame, text="Ok", command=self._filtre_action)
-        self._filtre_button.pack(side="left")
-
-        self._filtre_entry.bind("<Button-1>", self._clear_filtre_entry)
 
         # Canvas
         self._canvas = None
@@ -145,10 +172,7 @@ class GraphPanel(Panel):
             graph = self.graph
 
         # On enlève ce qui était présent
-        if self._canvas is not None:
-            self._canvas.get_tk_widget().destroy()
-            self._toolbar.destroy()
-            # self._toolbar.get_tk_widget().destroy()
+        self.clear_graph()
 
         print("Plot du graphe (plot_graph)")
         graph_fig = graph.fig
@@ -162,26 +186,17 @@ class GraphPanel(Panel):
         self._canvas.draw()
         print("Fin du plot")
 
-    def _filtre_action(self):
-        weight = self._filtre_text.get()
-        # Si l'input n'est pas nul
-        if weight != "":
-            if weight.isnumeric():
-                sub_graph = self.graph.weight_filter(int(weight))
-                if sub_graph is not None:
-                    self.plot_graph(sub_graph)
-                else:
-                    self._filtre_text.set("Poids introuvable")
-            else:
-                self._filtre_text.set("Ce n'est pas un nombre")
-        # Sinon on affiche tout
-        else:
-            self.plot_graph()
+    def clear_graph(self):
+        """Détruit les widgets contenant le graphe, le supprimant en même temps"""
+        if self._canvas is not None:
+            self._canvas.get_tk_widget().destroy()
+            self._toolbar.destroy()
+
 
     def _search_action(self):
         node = self._search_text.get()
         # Si l'input n'est pas nul
-        if node != "":
+        if node:
             sub_graph = self.graph.get_sub_graph(node)
             if sub_graph is not None:
                 self.plot_graph(sub_graph)
@@ -191,7 +206,24 @@ class GraphPanel(Panel):
         else:
             self.plot_graph()
 
-    def _clear_search_entry(self, evt):
+    def _filter_action(self):
+        weight = self._filter_text.get()
+        # Si l'input n'est pas nul
+        if weight:
+            if weight.isnumeric():
+                sub_graph = self.graph.weight_filter(int(weight))
+                if sub_graph is not None:
+                    self.plot_graph(sub_graph)
+                else:
+                    self._filter_text.set("Poids introuvable")
+            else:
+                self._filter_text.set("Ce n'est pas un nombre")
+        # Sinon on affiche tout
+        else:
+            self.plot_graph()
+
+
+    def _clear_search_entry(self, event):
         """
         Efface le contenu de la case s'il y a plusieurs mots (permet
         d'efface "Rechercher un mot" et "Mot introuvable" entre autres)
@@ -199,13 +231,45 @@ class GraphPanel(Panel):
         if len(self._search_text.get().split()) > 1:
             self._search_text.set("")
 
-    def _clear_filtre_entry(self, evt):
+    def _clear_filter_entry(self, event):
         """
         Efface le contenu de la case s'il y a plusieurs mots (permet
         d'efface "Filtrer un poids" et "Ce n'est pas un nombre" entre autres)
         """
-        if len(self._filtre_text.get().split()) > 1:
-            self._filtre_text.set("")
+        if len(self._filter_text.get().split()) > 1:
+            self._filter_text.set("")
+
+
+    def _import_graph_from_pickle(self, event=None):
+        ext = ""
+        filename = filedialog.askopenfilename(
+            defaultextension=".pickle",
+            filetypes=(("Fichiers pickle (*.pickle)", ".pickle"), ("Tous les fichiers", ".*")))
+        if filename:
+            self.graph = Graph.from_pickle(filename)
+            self.plot_graph()
+
+    def _export_graph_to_pickle(self, event=None):
+        # On demande a l'utilisateur dans quel fichier il veut sauver le graphe
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".pickle",
+            filetypes=(("Fichiers pickle (*.pickle)", ".pickle"), ("Tous les fichiers", ".*"))
+        )
+        # Si l'utilisateur a annulé ou fermé la fenêtre
+        if not filename:
+            return
+        try:
+            self.graph.save_as_pickle(filename)
+        except FileNotFoundError:
+            messagebox.showerror(
+                title="Error",
+                message="Erreur : fichier non trouvé"
+            )
+        except IOError:
+            messagebox.showerror(
+                title="Error",
+                message="Le fichier n'existe pas"
+            )
 
 
 def main():

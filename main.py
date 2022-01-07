@@ -10,7 +10,6 @@ import os
 from random import choices as rand_choices
 
 
-SAVE_FILE_NAME = "movies_by_genre.pkl"
 GRAPH_DICT = {}
 MOVIES_INFOS = []
 
@@ -75,7 +74,6 @@ def main():
                 # Alors il n'y a pas encore d'occurrences
                 if word not in GRAPH_DICT:
                     GRAPH_DICT[word] = copy_without_word
-                    # print("new graph dict :", GRAPH_DICT)
                 # S'il l'est, il faut additionner les occurrences
                 else:
                     # Pour chaque autre mot lié à ce mot

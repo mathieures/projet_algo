@@ -3,6 +3,7 @@ from networkx.drawing.nx_pydot import write_dot, read_dot
 import networkx as nx
 import igraph as ig
 import pickle
+from time import perf_counter
 
 # https://networkx.org/documentation/stable/reference/classes/multigraph.html
 
@@ -81,8 +82,6 @@ class Graph():
 
     def draw(self):
         """Charge la figure en mémoire"""
-        # pour le debug
-        from time import perf_counter
         print("début draw")
         print("spring_layout : ", end="")
         t = perf_counter()
@@ -125,16 +124,19 @@ class Graph():
             plt.show()
         print("fin show_in_window")
 
-    def save_as_png(self):
-        """Sauvegarde le graphe au format png"""
-        if self._graph is not None:
-            self.draw()
-            plt.savefig("graph.png")
+    # def save_as_png(self, filename):
+    #     """
+    #     Sauvegarde le graphe au format png
+    #     (déjà implémenté par matplotlib)
+    #     """
+    #     if self._graph is not None:
+    #         self.draw()
+    #         plt.savefig(filename)
 
-    def save_as_pickle(self):
+    def save_as_pickle(self, filename):
         if self._graph is not None:
-            with open('graph.pickle', 'wb') as f1:
-                pickle.dump(self, f1)
+            with open(filename, "wb") as f:
+                pickle.dump(self, f)
 
 
     # -----------------------------Ces fonctionnalités nécessitent l'installation de graphviz-----------------------------
@@ -159,10 +161,10 @@ class Graph():
 def main():
     # On se repose sur le fait que les dict sauvegardent l'ordre d'insertion depuis Python 3.7
     graph_dict = {
-        "salut": {"bonjour": 2, "ok": 3, "prout": 3},
+        "salut": {"bonjour": 2, "ok": 3, "truc": 3},
         "bonjour": {"ok": 4},
-        "ok": {"prout": 2, "bonjour": 2},
-        "prout": {"ok": 5}
+        "ok": {"truc": 2, "bonjour": 2},
+        "truc": {"ok": 5}
     }
     graph = Graph(graph_dict)
     graph.show_in_window()
@@ -208,10 +210,10 @@ def main():
 
 def test():
     GRAPH_DICT = {
-        "salut": {"bonjour": 2, "ok": 3, "prout": 3},
+        "salut": {"bonjour": 2, "ok": 3, "truc": 3},
         "bonjour": {"ok": 4},
-        "ok": {"prout": 2, "bonjour": 2},
-        "prout": {"ok": 5}
+        "ok": {"truc": 2, "bonjour": 2},
+        "truc": {"ok": 5}
     }
 
     g = Graph.from_dict(GRAPH_DICT)
