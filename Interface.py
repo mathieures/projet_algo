@@ -27,8 +27,8 @@ class Interface:
         self._bottom_frame.pack(side=tk.BOTTOM, anchor="se")  # En bas à droite
 
         # Bouton pour ajouter un panneau
-        self._add_panel_button = tk.Button(self._bottom_frame, text="+",
-                                           command=self.add_panel, width=2)
+        self._add_panel_button = tk.Button(self._bottom_frame, text="Ajouter un panneau",
+                                           command=self.add_panel)
         self._add_panel_button.pack()
 
         # InfoPanel
