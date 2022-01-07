@@ -182,7 +182,10 @@ class GraphPanel(Panel):
                 self._filtre_text.set("Ce n'est pas un nombre")
         # Sinon on affiche tout
         else:
-            self.plot_graph()
+            if self._sub_graph is not None:
+                self.plot_graph(self._sub_graph)
+            else:
+                self.plot_graph()
 
     def _search_action(self):
         node = self._search_text.get()
