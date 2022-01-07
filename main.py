@@ -95,7 +95,7 @@ def main():
 
                 # On rassemble tout dans un seul objet
                 movie = Movie.merge_into_Movie(temp, movie)
-            print(movie)
+            # print(movie)
 
             MOVIES_INFOS.append(movie)
 

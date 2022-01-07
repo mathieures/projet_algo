@@ -132,7 +132,6 @@ class Movie(PartialMovie):
 
 def main():
     pass
-    # TODO : écrire des tests
 
 
 if __name__ == '__main__':

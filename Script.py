@@ -65,19 +65,9 @@ class Script:
 
         # Compte le nombre d'occurrences de chaque mot dans la liste
         self._parsed_script = {word: word_list.count(word) for word in word_list if len(word) > 1}
-        # # occurrences = {word: word_list.count(word) for word in word_list}
-
-        # # Associe chaque mot aux autres
-        # self._parsed_script = {}
-        # for word in occurrences:
-        #     copy_without_word = occurrences.copy()
-        #     copy_without_word.pop(word)
-        #     self._parsed_script[word] = copy_without_word
-        # # self._parsed_script = {word: occurrences.copy().pop(word) for word in occurrences}
 
 
 def main():
-    # TODO : refaire les tests
     """
     script_str = "<b><i>Hello</i></b>, mister <i>villain</i>.\n<b>Welcome to my <i>kingdom</i>, my kingdom come.</b>"
     print(f"Base string: {script_str}\n")
