@@ -28,7 +28,7 @@ class Interface:
 
         # Bouton pour ajouter un panneau
         self._add_panel_button = tk.Button(self._bottom_frame, text="Ajouter un panneau",
-                                           command=self.add_panel)
+                                           command=self.add_GraphPanel)
         self._add_panel_button.pack()
 
         # InfoPanel
@@ -38,18 +38,39 @@ class Interface:
         # Crée une liste de taille `nb_graph_panels` contenant des objets GraphPanel
         self._graph_panels = []
         for _ in range(nb_graph_panels):
-            self.add_panel()
+            self.add_GraphPanel()
 
         # Pour gerer la fermeture de la fenetre
         self._root.protocol("WM_DELETE_WINDOW", self._quit_interface)
 
         self._root.mainloop()  # Bloquant
 
-    def add_panel(self):
+    def add_GraphPanel(self):
         """Ajoute un GraphPanel à l'interface"""
-        new_panel = GraphPanel(self._root, self._graph_dict)
+        new_panel = GraphPanel(self, self._root, self._graph_dict)
         self._graph_panels.append(new_panel)
         new_panel.pack()
+        self.resize_GraphPanels()
+
+    def remove_GraphPanel(self, graph_panel):
+        """Enlève et détruit proprement un GraphPanel"""
+        if graph_panel in self._graph_panels:
+            graph_panel.destroy()
+            self._search_text.remove(graph_panel)
+            self.resize_GraphPanels()
+
+    def resize_GraphPanels(self):
+        """Redimensionne les GraphPanel pour laisser de la place à chacun"""
+        for graph_panel in self._graph_panels:
+            # On calcule la place restante et on la divise par le nombre de GraphPanels
+            window_width = self._root.winfo_width()
+            info_panel_width = self._info_panel.winfo_width()
+            new_width = (window_width - info_panel_width) // len(self._graph_panels)
+            graph_panel.canvas.get_tk_widget().config(width=new_width)
+            # graph_panel.canvas.get_tk_widget().config(height=self._root.winfo_height())
+            graph_panel.toolbar.config(width=new_width)
+            # graph_panel.toolbar.config(height=self._root.winfo_height())
+
 
     def _quit_interface(self):
         exit(1)
@@ -65,9 +86,9 @@ class Panel(tk.Frame):
             **kwargs
         )
 
-    def pack(self):
+    def pack(self, **kwargs):
         """Écrase la méthode `pack()` de la classe parente"""
-        super().pack(side=tk.LEFT)  # Les panneaux seront pack de gauche à droite
+        super().pack(side=tk.LEFT, **kwargs) # Les panneaux seront pack de gauche à droite
 
 
 class InfoPanel(Panel):
@@ -97,7 +118,9 @@ class InfoPanel(Panel):
 class GraphPanel(Panel):
     """Panneau contenant un graphe."""
 
-    def __init__(self, parent, graph_dict):
+    def __init__(self, interface, parent, graph_dict):
+        self._interface = interface # On la sauvegarde pour pouvoir appeler resize_GraphPanels()
+        # super().__init__(parent, bg="red")
         super().__init__(parent, bg="#bbb")
 
         # Cadre du haut
@@ -123,9 +146,9 @@ class GraphPanel(Panel):
         self._file_menu.pack(side=tk.LEFT)
 
         # Bouton pour supprimer un GraphPanel
-        self._destroy_button = tk.Button(self._menu_frame, text="Fermer le panneau",
-                                         command=self.destroy)
-        self._destroy_button.pack(side="left")
+        self._close_button = tk.Button(self._menu_frame, text="Fermer le panneau",
+                                         command=self._close)
+        self._close_button.pack(side="left")
 
         # Zone de filtre (à droite)
         self._filter_frame = tk.Frame(self._menu_frame)
@@ -158,13 +181,22 @@ class GraphPanel(Panel):
         self._search_entry.bind("<Button-1>", self._clear_search_entry)
 
         # Canvas
-        self._canvas = None
-        self._toolbar = None
+        self._canvas_frame = tk.Frame(self)
+        self._canvas_frame.pack()
+        self.canvas = None
+        self.toolbar = None
 
         self.graph = Graph.from_dict(graph_dict)
         # self._sub_graph va garder en memoire le sous graphe d'une recherche de mot
         self._sub_graph = None
         self.plot_graph()
+
+    def pack(self):
+        """
+        On veut que les graphes prennent
+        spécifiquement toute la place disponible
+        """
+        super().pack(expand=True, fill="both")
 
     def plot_graph(self, graph=None):
         # Grâce à : https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
@@ -174,22 +206,24 @@ class GraphPanel(Panel):
         # On enlève ce qui était présent
         self.clear_graph()
 
-        print("Plot du graphe (plot_graph)")
-        graph_fig = graph.fig
         graph.draw()
-        self._canvas = FigureCanvasTkAgg(graph_fig, master=self)
+        self.canvas = FigureCanvasTkAgg(graph.fig, master=self)
         # tk.Canvas(self, width=150, height=150, bg="red")
-        self._canvas.get_tk_widget().pack(side=tk.BOTTOM)
+        self.canvas.get_tk_widget().pack(fill="both")
 
-        self._toolbar = NavigationToolbar2Tk(self._canvas, self)
-        self._toolbar.pack(side=tk.BOTTOM)
-        self._canvas.draw()
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self)
+        self.toolbar.pack(fill="both")
+        self.canvas.draw()
 
     def clear_graph(self):
         """Détruit les widgets contenant le graphe, le supprimant en même temps"""
-        if self._canvas is not None:
-            self._canvas.get_tk_widget().destroy()
-            self._toolbar.destroy()
+        if self.canvas is not None:
+            self.canvas.get_tk_widget().destroy()
+            self.toolbar.destroy()
+
+    def _close(self):
+        """Ferme le Panel et nettoie"""
+        self._interface.remove_GraphPanel(self)
 
 
     def _filter_action(self):
