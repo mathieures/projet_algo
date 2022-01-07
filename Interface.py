@@ -40,7 +40,6 @@ class Interface:
         for _ in range(nb_graph_panels):
             self.add_panel()
 
-
         # Pour gerer la fermeture de la fenetre
         self._root.protocol("WM_DELETE_WINDOW", self._quit_interface)
 
@@ -51,7 +50,6 @@ class Interface:
         new_panel = GraphPanel(self._root, self._graph_dict)
         self._graph_panels.append(new_panel)
         new_panel.pack()
-
 
     def _quit_interface(self):
         exit(1)
@@ -186,7 +184,6 @@ class GraphPanel(Panel):
         self._toolbar = NavigationToolbar2Tk(self._canvas, self)
         self._toolbar.pack(side=tk.BOTTOM)
         self._canvas.draw()
-        print("Fin du plot")
 
     def clear_graph(self):
         """Détruit les widgets contenant le graphe, le supprimant en même temps"""
@@ -195,36 +192,46 @@ class GraphPanel(Panel):
             self._toolbar.destroy()
 
 
-    def _search_action(self):
-        node = self._search_text.get()
-        # Si l'input n'est pas nul
-        if node:
-            sub_graph = self.graph.get_sub_graph(node)
-            if sub_graph is not None:
-                self.plot_graph(sub_graph)
-            else:
-                self._search_text.set("Mot introuvable")
-        # Sinon on affiche tout
-        else:
-            self.plot_graph()
-            self._sub_graph = None
-
     def _filter_action(self):
         weight = self._filter_text.get()
         # Si l'input n'est pas nul
         if weight:
             if weight.isnumeric():
-                sub_graph = self.graph.weight_filter(int(weight))
+                # Si une recherche était en cours, on applique le filtre dessus
+                if self._sub_graph is not None:
+                    sub_graph = self._sub_graph.weight_filter(int(weight))
+                else:
+                    sub_graph = self.graph.weight_filter(int(weight))
+                # Si on a bien affecté sub_graph, on le plot
                 if sub_graph is not None:
                     self.plot_graph(sub_graph)
+                # Sinon on le signale
                 else:
-                    self._filter_text.set("Poids introuvable")
+                    self._filtre_text.set("Poids introuvable")
             else:
-                self._filter_text.set("Ce n'est pas un nombre")
+                self._filtre_text.set("Ce n'est pas un nombre")
         # Sinon on affiche tout
         else:
-            self.plot_graph()
+            if self._sub_graph is not None:
+                self.plot_graph(self._sub_graph)
+            else:
+                self.plot_graph()
+            self._filter_text.set("Filtrer par poids")
 
+    def _search_action(self):
+        node = self._search_text.get()
+        # Si l'input n'est pas nul
+        if node:
+            self._sub_graph = self.graph.get_sub_graph(node)
+            if self._sub_graph is not None:
+                self.plot_graph(self._sub_graph)
+            else:
+                self._search_text.set("Mot introuvable")
+        # Sinon on affiche tout
+        else:
+            self._search_text.set("Rechercher un mot")
+            self.plot_graph()
+            self._sub_graph = None
 
     def _clear_search_entry(self, event):
         """
