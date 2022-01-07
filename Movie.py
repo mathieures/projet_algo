@@ -79,6 +79,9 @@ class PartialMovie:
         string = ", ".join(f"{key}: {self.__dict__[key]}" for key in self.__dict__)
         return f"<{type(self).__name__}: {string}>"
 
+    def __str__(self):
+        return f"{self.title}"
+
 
 class Movie(PartialMovie):
     """

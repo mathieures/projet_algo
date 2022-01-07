@@ -86,10 +86,10 @@ def main():
             # On fait appel à l'API TMDB pour avoir les autres informations
             tmdb_result = tmdb_api.search_movie(movie_title)
             if tmdb_result is None:
-                print(f"[Avertissement] Informations indisponibles. Choix d'un autre film.")
-                picked_movies.append(pick_movies(data, 1))
-                continue
-
+                print(f"[Avertissement] Informations indisponibles.")
+                # Pour prendre un autre film, décommenter les lignes ci-dessous.
+                # picked_movies.append(pick_movies(data, 1))
+                # continue
             else:
                 temp = PartialMovie.from_dict(tmdb_result)
                 temp.genres = extract_genres(tmdb_result)
