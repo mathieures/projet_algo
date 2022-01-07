@@ -2,7 +2,8 @@ import tkinter as tk
 import matplotlib.pyplot as plt
 from Graph import Graph
 
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
 
 
 class Interface:
@@ -11,7 +12,6 @@ class Interface:
     @property
     def nb_graph_panels(self):
         return len(self._graph_panels)
-
 
     def __init__(self, nb_graph_panels, movies_infos, graph_dict):
         self._movies_infos = movies_infos
@@ -23,7 +23,7 @@ class Interface:
 
         # Cadre du bas
         self._bottom_frame = tk.Frame(self._root)
-        self._bottom_frame.pack(side=tk.BOTTOM, anchor="se") # En bas à droite
+        self._bottom_frame.pack(side=tk.BOTTOM, anchor="se")  # En bas à droite
 
         # Bouton pour ajouter un panneau
         self._add_panel_button = tk.Button(self._bottom_frame, text="+",
@@ -42,8 +42,7 @@ class Interface:
         # Pour gerer la fermeture de la fenetre
         self._root.protocol("WM_DELETE_WINDOW", self._quit_interface)
 
-        self._root.mainloop() # Bloquant
-
+        self._root.mainloop()  # Bloquant
 
     def add_panel(self):
         """Ajoute un GraphPanel à l'interface"""
@@ -57,6 +56,7 @@ class Interface:
 
 class Panel(tk.Frame):
     """Classe décrivant un "panneau", élément de l'interface."""
+
     def __init__(self, parent, **kwargs):
         super().__init__(
             parent,
@@ -66,7 +66,7 @@ class Panel(tk.Frame):
 
     def pack(self):
         """Écrase la méthode `pack()` de la classe parente"""
-        super().pack(side=tk.LEFT) # Les panneaux seront pack de gauche à droite
+        super().pack(side=tk.LEFT)  # Les panneaux seront pack de gauche à droite
 
 
 class InfoPanel(Panel):
@@ -86,15 +86,16 @@ class InfoPanel(Panel):
         for movie in movies_infos:
             lf = tk.LabelFrame(self, text=movie.title)
             # On crée un Label contenant les informations du film
-            tk.Label(lf, text=str(movie)).pack() # __str__ est modifiée dans Movie
+            # __str__ est modifiée dans Movie
+            tk.Label(lf, text=str(movie)).pack()
             self._labelframes.append(lf)
         for lf in self._labelframes:
             lf.pack(anchor="n", side=tk.BOTTOM)
 
 
-
 class GraphPanel(Panel):
     """Panneau contenant un graphe."""
+
     def __init__(self, parent, graph_dict):
         super().__init__(parent, bg="#bbb")
 
@@ -110,12 +111,26 @@ class GraphPanel(Panel):
         # Zone de recherche
         self._search_text = tk.StringVar()
         self._search_text.set("Rechercher un mot")
-        self._search_entry = tk.Entry(self._top_frame, width=20, textvariable=self._search_text)
+        self._search_entry = tk.Entry(
+            self._top_frame, width=20, textvariable=self._search_text)
         self._search_entry.pack(side=tk.LEFT)
-        self._search_button = tk.Button(self._top_frame, text="Ok", command=self._search_action)
+        self._search_button = tk.Button(
+            self._top_frame, text="Ok", command=self._search_action)
         self._search_button.pack(side="left")
 
         self._search_entry.bind("<Button-1>", self._clear_search_entry)
+
+        # Zone de filtre
+        self._filtre_text = tk.StringVar()
+        self._filtre_text.set("Filtrer par poids")
+        self._filtre_entry = tk.Entry(
+            self._top_frame, width=20, textvariable=self._filtre_text)
+        self._filtre_entry.pack(side=tk.LEFT)
+        self._filtre_button = tk.Button(
+            self._top_frame, text="Ok", command=self._filtre_action)
+        self._filtre_button.pack(side="left")
+
+        self._filtre_entry.bind("<Button-1>", self._clear_filtre_entry)
 
         # Canvas
         self._canvas = None
@@ -123,7 +138,6 @@ class GraphPanel(Panel):
 
         self.graph = Graph.from_dict(graph_dict)
         self.plot_graph()
-
 
     def plot_graph(self, graph=None):
         # Grâce à : https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html#
@@ -148,6 +162,22 @@ class GraphPanel(Panel):
         self._canvas.draw()
         print("Fin du plot")
 
+    def _filtre_action(self):
+        weight = self._filtre_text.get()
+        # Si l'input n'est pas nul
+        if weight != "":
+            if weight.isnumeric():
+                sub_graph = self.graph.weight_filter(int(weight))
+                if sub_graph is not None:
+                    self.plot_graph(sub_graph)
+                else:
+                    self._filtre_text.set("Poids introuvable")
+            else:
+                self._filtre_text.set("Ce n'est pas un nombre")
+        # Sinon on affiche tout
+        else:
+            self.plot_graph()
+
     def _search_action(self):
         node = self._search_text.get()
         # Si l'input n'est pas nul
@@ -169,6 +199,14 @@ class GraphPanel(Panel):
         if len(self._search_text.get().split()) > 1:
             self._search_text.set("")
 
+    def _clear_filtre_entry(self, evt):
+        """
+        Efface le contenu de la case s'il y a plusieurs mots (permet
+        d'efface "Filtrer un poids" et "Ce n'est pas un nombre" entre autres)
+        """
+        if len(self._filtre_text.get().split()) > 1:
+            self._filtre_text.set("")
+
 
 def main():
     """
@@ -187,7 +225,7 @@ def main():
     """
 
     nb_graph_panels = 1
-    interface = Interface(nb_graph_panels) # bloquant
+    interface = Interface(nb_graph_panels)  # bloquant
 
 
 if __name__ == '__main__':
