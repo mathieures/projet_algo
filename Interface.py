@@ -174,10 +174,10 @@ class GraphPanel(Panel):
                     sub_graph = self._sub_graph.weight_filter(int(weight))
                 else:
                     sub_graph = self.graph.weight_filter(int(weight))
-                if self._sub_graph is not None:
+                if sub_graph is not None:
                     self.plot_graph(sub_graph)
                 else:
-                    self._filtre_text.set("Poids introuvable")
+                    self._filter_text.set("Poids introuvable")
             else:
                 self._filtre_text.set("Ce n'est pas un nombre")
         # Sinon on affiche tout
@@ -186,6 +186,7 @@ class GraphPanel(Panel):
                 self.plot_graph(self._sub_graph)
             else:
                 self.plot_graph()
+            self._filter_text.set("Filtrer par poids")
 
     def _search_action(self):
         node = self._search_text.get()
@@ -198,6 +199,7 @@ class GraphPanel(Panel):
                 self._search_text.set("Mot introuvable")
         # Sinon on affiche tout
         else:
+            self._search_text.set("Rechercher un mot")
             self.plot_graph()
             self._sub_graph = None
 
