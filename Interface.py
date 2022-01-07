@@ -101,7 +101,6 @@ class InfoPanel(Panel):
         # Barre de défilement
         # self._scrollbar = tk.Scrollbar(self, orient="vertical")
         # self._scrollbar.pack(anchor="e", side=tk.RIGHT, fill=tk.Y)
-        # TODO : trouver faire défiler une Frame
         # self.config(yscrollcommand=self._scrollbar.set)
         # self._scrollbar.config(command=self.yview)
 
