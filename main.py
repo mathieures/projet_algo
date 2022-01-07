@@ -1,58 +1,73 @@
 import imsdb_api
 import tmdb_api
+from ConfigWindow import ConfigWindow
 from Interface import Interface
-import Movie
-import Script
+from Movie import PartialMovie, Movie
+from Script import Script
 
 import concurrent.futures
 import os
+from random import choices as rand_choices
 
 
 SAVE_FILE_NAME = "movies_by_genre.pkl"
 GRAPH_DICT = {}
+MOVIES_INFOS = []
+
+
+def pick_movies(data, count):
+    choices = rand_choices(list(data), k=count)
+    if count == 1:
+        choices = choices[0]
+    return choices
+
+def extract_genres(tmdb_result):
+    """
+    Extraie les genres d'un résultat de l'API TMDB,
+    car ils ne sont pas exploitables directement.
+    """
+    return [genre["name"] for genre in tmdb_result["genres"]]
 
 
 def main():
     global GRAPH_DICT
+    global MOVIES_INFOS
 
     # Récupération des données sur le site de scénarios
+    print(f"Récupération des titres de film…")
     data = imsdb_api.getName()
     # Associe les noms de film à l'url de leur page IMSDB.
 
+    config = ConfigWindow() # bloquant
+    movie_nb, word_nb = config.movie_nb, config.word_nb
 
-    GRAPH_DICT = {
-        "salut": {"bonjour": 2, "ok": 3, "prout": 3},
-        "bonjour": {"ok": 4},
-        "ok": {"prout": 2, "bonjour": 2},
-        "prout": {"ok": 5}
-    }
 
-    nb_panels = 1
-    interface = Interface(nb_panels, GRAPH_DICT)  # bloquant
-
-    return
-
+    picked_movies = pick_movies(data, movie_nb)
+    print(f"Films choisis : {picked_movies}")
 
     try:
-        for movie_title in data:
+        for movie_title in picked_movies:
+
+            movie = PartialMovie(title=movie_title)
+
             print(f"Film : {movie_title}")
-            # TODO : voir si on garde l'API ou pas, vu qu'on n'a besoin que du script
-            """
-            # On fait appel à l'API TMDB pour avoir les autres informations
-            movie = tmdb_api.search_movie(movie_title)
-            """
 
             print("Téléchargement du script")
             # On télécharge le script
-            script = Script.Script(data[movie_title])
-            script.download() # Facultatif
-
+            movie.script = Script(data[movie_title], max_words=word_nb)
+            try:
+                movie.script.download() # Facultatif
+            except RecursionError as e:
+                print(e)
+                print(f"[Avertissement] Choix d'un autre film.")
+                picked_movies.append(pick_movies(data, 1)) # On en récupère un autre
+                continue
 
             print("Traitement du script")
             # On le traite et on met le résultat dans le dictionnaire principal
-            script.parse() # Facultatif
-            for word in script.parsed_script:
-                copy_without_word = script.parsed_script.copy()
+            movie.script.parse() # Facultatif
+            for word in movie.script.parsed_script:
+                copy_without_word = movie.script.parsed_script.copy()
                 del copy_without_word[word]
                 # Si le mot de base n'est pas présent dans le dictionnaire,
                 # Alors il n'y a pas encore d'occurrences
@@ -68,23 +83,31 @@ def main():
                         # On additionne
                         GRAPH_DICT[word][other_word] += copy_without_word[other_word]
 
-            # A SUPPRIMER
-            keys = list(GRAPH_DICT)
-            print("nb mots :", len(keys))
-            for i in range(int(0.95 * len(keys))):
-                del GRAPH_DICT[keys[i]] # test pour voir si quand on supprime des clés c'est plus rapide
-            print("Fin du traitement du script")
-            break
+            # On fait appel à l'API TMDB pour avoir les autres informations
+            tmdb_result = tmdb_api.search_movie(movie_title)
+            if tmdb_result is None:
+                print(f"[Avertissement] Informations indisponibles. Choix d'un autre film.")
+                picked_movies.append(pick_movies(data, 1))
+                continue
 
-                # GRAPH_DICT.update(script.parsed_script)
-    # Pour pouvoir arrêter le processus si on est pressé
+            else:
+                temp = PartialMovie.from_dict(tmdb_result)
+                temp.genres = extract_genres(tmdb_result)
+
+                # On rassemble tout dans un seul objet
+                movie = Movie.merge_into_Movie(temp, movie)
+            print(movie)
+
+            MOVIES_INFOS.append(movie)
+
+    # Pour pouvoir arrêter le processus si on est pressé : Ctrl+C
     except KeyboardInterrupt:
         pass
 
     # print("final :", GRAPH_DICT)
 
     nb_panels = 1
-    interface = Interface(nb_panels, GRAPH_DICT)  # bloquant
+    interface = Interface(nb_panels, MOVIES_INFOS, GRAPH_DICT)  # bloquant
 
 
 if __name__ == '__main__':

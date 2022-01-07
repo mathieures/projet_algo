@@ -35,7 +35,7 @@ class PartialMovie:
             title=dict_.get("title"),
             script=dict_.get("script"),
             movie_url=dict_.get("movie_url")
-        )
+        ) if dict_ is not None else None
 
     # @property
     # def script(self):
@@ -75,8 +75,9 @@ class PartialMovie:
         self.script = script # objet Script
 
     def __repr__(self):
-        """Représentation utilisée notamment par tkinter pour l'affichage"""
-        return f"{self.title}"
+        """Affiche les informations du film"""
+        string = ", ".join(f"{key}: {self.__dict__[key]}" for key in self.__dict__)
+        return f"<{type(self).__name__}: {string}>"
 
 
 class Movie(PartialMovie):
@@ -109,9 +110,10 @@ class Movie(PartialMovie):
         """
         temp = PartialMovie()
         for pm in partial_movies:
-            for key, val in pm.__dict__.items():
-                if val is not None:
-                    temp.__dict__[key] = val
+            if isinstance(pm, PartialMovie):
+                for key, val in pm.__dict__.items():
+                    if val is not None:
+                        temp.__dict__[key] = val
         return cls.from_PartialMovie(temp)
 
     def __init__(self,
@@ -140,13 +142,11 @@ class Movie(PartialMovie):
         Transforme les attributs de la classe
         en une chaîne de caractères formatée
         """
-        return f"""{super().__str__()}
-               Budget : {self.budget}
-               Date : {self.date}
-               Duration : {self.duration}
-               Genres : {", ".join(self.genres)}
-               Note : {self.note}
-               Number of unique words: {len(self.words)} words"""
+        return "\n".join([f"Budget : {self.budget}",
+                          f"Date : {self.date}",
+                          f"Duration : {self.duration}",
+                          f"Genres : {', '.join(self.genres)}",
+                          f"Note : {self.note}"])
 
 
 def main():

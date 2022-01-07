@@ -95,8 +95,14 @@ def getScript(movie_url):
             soup = BeautifulSoup(req.text, "html.parser")
 
             tag = soup.find(class_="scrtext")
-            script = tag.pre
-            return script
+            try:
+                script = tag.pre
+            except AttributeError:
+                # AttributeError : levée quand le script n'est pas atteignable
+                print(f"[Avertissement] Script indisponible.")
+                return None
+            else:
+                return script
     return None
 
 

@@ -29,13 +29,19 @@ class Script:
             self.parse()
         return self._parsed_script
 
-    def __init__(self, movie_url):
+    def __init__(self, movie_url, max_words=None):
         self._movie_url = movie_url
         self.script = None # str
         self._parsed_script = None # dict
 
+        self._max_words = max_words
+
     def download(self):
-        raw_script = str(imsdb_api.getScript(self._movie_url))
+        try:
+            raw_script = str(imsdb_api.getScript(self._movie_url))
+        except RecursionError:
+            # RecursionError : parfois levée à cause de BeautifoulSoup qui gère mal les str
+            raise RecursionError("BeautifulSoup n'est pas parvenu à convertir le script en str.")
         # On enlève le contenu des balises <b>, et
         # toutes les autres balises sont supprimées
         self.script = self._remove_tags(self._remove_b_tags(raw_script))
@@ -43,15 +49,19 @@ class Script:
     def parse(self):
         """
         Transforme le script en un dictionnaire
-        associant les mots et leurs occurrences
+        associant les mots (maximum `self._max_words`
+        mots, ou la totalité si None) et leurs occurrences
         """
         if self.script is None:
             self.download()
-        reg = re.compile("\D+") # non-digit
+        reg = re.compile("[a-zA-Z]+")
         # Liste de tous les mots convertis en minuscules
         word_list = [reg.search(word)[0].lower() # [0] : tout ce qui a match
                      for word in self.script.split()
                      if reg.search(word) is not None]
+
+        if self._max_words is not None:
+            word_list = word_list[:self._max_words]
 
         # Compte le nombre d'occurrences de chaque mot dans la liste
         self._parsed_script = {word: word_list.count(word) for word in word_list if len(word) > 1}
